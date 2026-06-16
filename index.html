@@ -477,7 +477,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.5 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.6 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -558,6 +558,14 @@ function programmeEndDate(){
   if(isNaN(day)||mo<0)return null;
   const yr=new Date().getFullYear()+(mo<new Date().getMonth()?1:0);
   return new Date(yr,mo,day);}
+function jourToDS(jourStr){
+  /* Convertit "mardi 16 juin" ou "16 juin" → "16/06/2026" */
+  const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const parts=(jourStr||'').toLowerCase().split(' ').filter(Boolean);
+  const day=parseInt(parts[parts.length-2]);const mo=mois.indexOf(parts[parts.length-1]);
+  if(isNaN(day)||mo<0)return null;
+  const today=new Date();const yr=today.getFullYear()+(mo<today.getMonth()?1:0);
+  return String(day).padStart(2,'0')+'/'+String(mo+1).padStart(2,'0')+'/'+yr;}
 function tdeeBase(){const b=bmr();return b?Math.round(b*actFactor(S.profile.act)):0;}
 /* objectif : kg à perdre + kcal totales — supporte 3 modes */
 function goalCalc(){const p=S.profile;const w=num(p.weight);if(!w)return null;
@@ -671,16 +679,34 @@ function renderProgPage(){
   const jbox=$('#progJoursList');
   if(jbox){
     const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
+    const actOpts=['<option value="">— Repos (BMR×base) —</option>'].concat(Object.entries(acts).map(([name,kcal])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>')).join('');
     const header='<div style="display:flex;justify-content:space-between;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600">'+
-      '<span>Jour · activité</span>'+
-      '<span style="text-align:right;min-width:140px"><span style="color:var(--ok)">Je mange</span> · <span style="color:var(--bad)">Je brûle</span></span></div>';
+      '<span style="flex:1">Jour</span><span style="flex:1">Activité</span>'+
+      '<span style="text-align:right;min-width:130px"><span style="color:var(--ok)">Je mange</span> · <span style="color:var(--bad)">Je brûle</span></span></div>';
     jbox.innerHTML=header+(S.programme.jours||[]).map(j=>{
-      const sportKcal=acts[j.type]!=null?acts[j.type]:Math.max(0,(j.calories_brulees||0)-base);
-      const depense=base+sportKcal;
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:.88rem">'+
-        '<span><b>'+esc(j.jour)+'</b> <span class="muted">· '+esc(j.type)+'</span></span>'+
-        '<span style="text-align:right;min-width:140px"><b style="color:var(--ok)">'+j.calories+'</b> · <b style="color:var(--bad)">'+depense+'</b> kcal</span></div>';
-    }).join('');}}
+      const ds=jourToDS(j.jour)||'';
+      const dayOverride=ds&&S.days[ds]?S.days[ds].progActivity:undefined;
+      const curName=dayOverride===false?'':(dayOverride?dayOverride.name:j.type);
+      const sportKcal=curName&&acts[curName]!=null?acts[curName]:Math.max(0,(j.calories_brulees||0)-base);
+      const depense=curName?base+sportKcal:base;
+      const opts=actOpts.replace('value="'+esc(curName)+'"','value="'+esc(curName)+'" selected');
+      return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.85rem" data-ds="'+esc(ds)+'">'+
+        '<span style="flex:1"><b>'+esc(j.jour)+'</b></span>'+
+        '<select class="prog-jour-actsel" data-ds="'+esc(ds)+'" data-deftype="'+esc(j.type)+'" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink);font-size:.8rem">'+opts+'</select>'+
+        '<span class="prog-jour-kcal" data-ds="'+esc(ds)+'" style="text-align:right;min-width:130px"><b style="color:var(--ok)">'+j.calories+'</b> · <b style="color:var(--bad)">'+depense+'</b> kcal</span></div>';
+    }).join('');
+    /* binding des sélecteurs de la liste jours */
+    $$('.prog-jour-actsel').forEach(sel=>{sel.onchange=()=>{
+      const ds=sel.dataset.ds;if(!ds)return;
+      const v=sel.value;const d=getDay(ds);
+      d.progActivity=(v==='')?false:{name:v,kcal:acts[v]||0};
+      save();
+      /* Mise à jour du chiffre dépensé sans re-render complet */
+      const sportK=v&&acts[v]!=null?acts[v]:0;
+      const dep=v?base+sportK:base;
+      const kspan=$$('.prog-jour-kcal[data-ds="'+ds+'"]')[0];
+      if(kspan){const cur=kspan.innerHTML.match(/<b style="color:var\(--ok\)">(.*?)<\/b>/);const eat=cur?cur[1]:'—';kspan.innerHTML='<b style="color:var(--ok)">'+eat+'</b> · <b style="color:var(--bad)">'+dep+'</b> kcal';}
+      renderDays();};});}}
 
 /* ============================== JOURS ============================== */
 function getDay(ds){if(!S.days[ds])S.days[ds]={weight:'',act:S.profile.act||'1.30',sport:null,foods:[]};return S.days[ds];}
