@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.1 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.2 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -682,7 +682,7 @@ function renderProgPage(){
   const jbox=$('#progJoursList');
   if(jbox){
     const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
-    const actOpts=['<option value="">— Journée sans sport —</option>'].concat(Object.entries(acts).map(([name,kcal])=>'<option value="'+esc(name)+'">'+esc(isRepos(name)?'Journée sans sport':name)+'</option>')).join('');
+    const actOpts=['<option value="">— Journée sans sport —</option>','<option value="Libre">Libre — journée neutre</option>'].concat(Object.entries(acts).filter(([name])=>!isLibre(name)&&!isRepos(name)).map(([name,kcal])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>')).join('');
     let cumDef=0;
     jbox.innerHTML=(S.programme.jours||[]).map(j=>{
       const ds=jourToDS(j.jour)||'';
@@ -797,8 +797,9 @@ function renderDays(){
     /* sélecteur activité programme */
     const acts=getProgramActivites();
     const curAct=getDayActivity(ds);
-    let progOpts='<option value="">— Journée sans sport —</option>';
-    Object.entries(acts).forEach(([name,kcal])=>{const sel=(curAct&&curAct.name===name)?' selected':'';progOpts+='<option value="'+esc(name)+'"'+sel+'>'+esc(isRepos(name)?'Journée sans sport':name)+' ('+Math.round(kcal)+' kcal)</option>';});
+    const libreSelProg=(curAct&&curAct.name==='Libre')?' selected':'';
+    let progOpts='<option value="">— Journée sans sport —</option><option value="Libre"'+libreSelProg+'>Libre — journée neutre</option>';
+    Object.entries(acts).filter(([name])=>!isLibre(name)&&!isRepos(name)).forEach(([name,kcal])=>{const sel=(curAct&&curAct.name===name)?' selected':'';progOpts+='<option value="'+esc(name)+'"'+sel+'>'+esc(name)+' ('+Math.round(kcal)+' kcal)</option>';});
     const sportSel='<div class="field">📅 Programme <select class="progactsel" data-ds="'+ds+'">'+progOpts+'</select></div>';
     const weightRow='<div class="field">⚖️ Poids <input class="inp xs wt" data-ds="'+ds+'" value="'+esc(day.weight||'')+'" placeholder="—"> kg</div>';
 
