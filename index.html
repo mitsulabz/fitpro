@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.8 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.9 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -789,33 +789,53 @@ function getDayRO(ds){return S.days[ds]||{weight:'',act:S.profile.act||'1.30',sp
 
 function renderGoal(cum,range){
   const g=goalCalc();const box=$('#goal');
-  if(!g){box.innerHTML='<div class="goal-empty">🎯 <b>Définis ton objectif</b><br>Renseigne ton poids, ton % de masse grasse actuel et cible dans les Réglages pour activer le suivi de l\'objectif.<br><button class="btn" id="goGoal">Aller aux Réglages</button></div>';
+  if(!g){box.innerHTML='<div class="goal-empty">🎯 <b>Définis ton objectif</b><br>Renseigne ton poids, ton % de masse grasse actuel et cible dans les Réglages pour activer le suivi de l'objectif.<br><button class="btn" id="goGoal">Aller aux Réglages</button></div>';
     const b=$('#goGoal');if(b)b.onclick=()=>switchTab('reglages');return;}
   const prog=Math.max(0,Math.min(100,cum/g.kcal*100));
   const kgLost=cum/7700;
-  const logged=range.filter(ds=>S.days[ds]&&S.days[ds].foods.length);
   const today=new Date();today.setHours(0,0,0,0);
-  let avg=0;
-  if(logged.length){const d0=parseDS(logged.slice().sort(cmpDS)[0]);const elapsed=Math.max(1,Math.round((today-d0)/86400000)+1);avg=cum/elapsed;}
-  function finDate(rate){if(rate<=0)return '—';const dl=(g.kcal-cum)/rate;if(dl<=0)return 'déjà atteint 🎉';return frShort(new Date(today.getTime()+dl*86400000));}
-  const rec=recDeficit();
+  const logged=range.filter(ds=>S.days[ds]&&S.days[ds].foods.length);
+  const loggedPast=logged.filter(ds=>parseDS(ds)<today);
   const bft=num(S.profile.bft);
-  const actLbl=actLabel(S.profile.act);
-  const sportH=num(S.profile.sportHours);
-  const sportTxt=sportH>0?('<b>'+sportH+' h de sport/semaine</b>'):'<b>sans sport régulier</b>';
-  /* Phrase 1 : projection au rythme RÉEL de l'historique */
-  let p1;
-  if(logged.length&&avg>0) p1='📊 D\'après mon historique, mon déficit moyen est de <b>'+Math.round(avg)+' kcal/jour</b>. Si je continue comme ça, j\'atteins mon objectif de <b>'+bft+' % de masse grasse</b> le <b>'+finDate(avg)+'</b>.';
-  else if(logged.length) p1='📊 D\'après mon historique, je n\'ai pas de déficit moyen (plutôt en surplus) : à ce rythme, l\'objectif n\'avance pas.';
-  else p1='📊 Pas encore d\'historique : enregistre quelques jours pour voir ta projection au rythme réel.';
-  /* Phrase 2 : projection OPTIMALE estimée (profil + sport) */
-  let p2;
-  if(rec) p2='🎯 Si à partir de maintenant, avec mes '+sportTxt+' et mon activité « <b>'+actLbl+'</b> », je tiens un déficit de <b>'+rec.def+' kcal/jour</b> (manger ~'+rec.intake+' kcal/j), j\'atteins mon objectif de <b>'+bft+' % de masse grasse</b> le <b>'+finDate(rec.def)+'</b>.';
-  else p2='🎯 Complète ton profil (poids, masse grasse, activité, sport) pour estimer ta date d\'atteinte optimale.';
-  /* phrases courtes affichées ; le détail complet est dépliable via le point info */
-  const short1=(logged.length&&avg>0)?('😎 Je serai bogoss le <b>'+finDate(avg)+'</b>'):'📊 Logge quelques jours pour l\'estimer';
-  const short2=rec?('💪 En tryhardant au max, je serai bogoss le <b>'+finDate(rec.def)+'</b>'):'🎯 Complète ton profil pour l\'estimer';
-  const goalLabel=g.byWeight?('🎯 Objectif : '+g.targetW.toFixed(1)+' kg'):('🎯 Objectif : '+g.targetW.toFixed(1)+' kg · '+bft+' % MG');
+  /* Conformité programme : cumul (mangé - cible programme) sur jours loggés */
+  let surplusVsProg=0,daysWithProg=0;
+  loggedPast.forEach(ds=>{const d=S.days[ds];const pd=getProgramDay(ds);
+    if(pd&&pd.calories){surplusVsProg+=Math.round(dayKcal(d))-pd.calories;daysWithProg++;}});
+  /* Phrase 1 : suivi du programme (ou historique si pas de programme) */
+  let p1,short1;
+  if(!S.programme){
+    let avg=0;
+    if(loggedPast.length){const d0=parseDS(loggedPast.slice().sort(cmpDS)[0]);const el=Math.max(1,Math.round((today-d0)/86400000)+1);avg=cum/el;}
+    const finD=r=>{if(r<=0)return '—';const dl=(g.kcal-cum)/r;if(dl<=0)return 'déjà atteint 🎉';return frShort(new Date(today.getTime()+dl*86400000));};
+    if(avg>0){p1='📊 Mon déficit moyen est de <b>'+Math.round(avg)+' kcal/jour</b>. À ce rythme, objectif le <b>'+finD(avg)+'</b>.';short1='😎 Je serai bogoss le <b>'+finD(avg)+'</b>';}
+    else{p1='📊 Logge quelques jours pour voir ta projection.';short1='📊 Logge quelques jours pour l'estimer';}
+  }else if(daysWithProg===0){
+    p1='📊 Commence à logger tes journées pour vérifier que tu suis ton programme.';
+    short1='📊 Logge tes journées pour suivre le programme';
+  }else if(surplusVsProg<=0){
+    p1='📊 Sur '+daysWithProg+' jours loggés : tu es <b>en avance</b> sur ton programme (−<b>'+Math.abs(Math.round(surplusVsProg))+' kcal</b> de mieux que prévu). Continue !';
+    short1='✅ Tu respectes ton programme';
+  }else{
+    const cardioh=(surplusVsProg/500).toFixed(1);
+    p1='📊 Sur '+daysWithProg+' jours loggés : tu as mangé <b>'+Math.round(surplusVsProg)+' kcal de trop</b> par rapport au programme. Pour rattraper : <b>'+cardioh+' h de cardio</b> supplémentaire (≈ 500 kcal/h).';
+    short1='⚠️ Rattraper : <b>'+cardioh+' h de cardio</b>';
+  }
+  /* Phrase 2 : date d'objectif via fin de programme ou déficit optimal */
+  let p2,short2;
+  const progEnd=programmeEndDate();
+  if(S.programme&&progEnd){
+    const fin=frShort(progEnd);
+    p2='🎯 Si tu suis ton programme jusqu'au bout, tu atteins ton objectif de <b>'+bft+' % de masse grasse</b> le <b>'+fin+'</b>.';
+    short2='💪 En tryhardant au max, je serai bogoss le <b>'+fin+'</b>';
+  }else{
+    const rec=recDeficit();
+    if(rec){
+      const finD2=r=>{if(r<=0)return '—';const dl=(g.kcal-cum)/r;if(dl<=0)return 'déjà atteint 🎉';return frShort(new Date(today.getTime()+dl*86400000));};
+      p2='🎯 En tenant un déficit de <b>'+rec.def+' kcal/jour</b> (manger ~'+rec.intake+' kcal/j), tu atteins <b>'+bft+' % de masse grasse</b> le <b>'+finD2(rec.def)+'</b>.';
+      short2='💪 En tryhardant au max, je serai bogoss le <b>'+finD2(rec.def)+'</b>';
+    }else{p2='🎯 Complète ton profil pour estimer ta date d'atteinte.';short2='🎯 Complète ton profil pour estimer';}
+  }
+  const goalLabel=g.byWeight?('🎯 Objectif : '+g.targetW.toFixed(1)+' kg'):('🎯 Objectif : '+g.targetW.toFixed(1)+' kg · '+bft+' % MG');
   box.innerHTML='<div class="goal-title">'+goalLabel+'</div>'+
     '<div class="goal-pct">'+prog.toFixed(1)+'%</div>'+
     '<div class="goal-prog"><span style="width:'+prog+'%"></span></div>'+
@@ -826,7 +846,6 @@ function renderGoal(cum,range){
     '</div>';
   box.querySelectorAll('.proj-i').forEach(b=>b.onclick=()=>{b.parentElement.querySelector('.proj-detail').classList.toggle('open');});
 }
-
 function bindDayEvents(){
   $$('.progactsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;const acts=getProgramActivites();d.progActivity=(v==='')?false:{name:v,kcal:acts[v]||0};save();renderDays();});
   $$('.wt').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).weight=i.value.trim();save();renderDays();});
