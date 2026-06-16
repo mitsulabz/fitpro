@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.7 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.8 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -972,7 +972,7 @@ $('#clearProg').onclick=()=>{if(confirm('Supprimer le programme ?')){S.programme
 /* ============================== HANDLERS PAGE PROGRAMME ============================== */
 $('#saveProgAct').onclick=()=>{
   const v=$('#prog_act').value;if(!v)return;
-  S.profile.act=v;save();renderDays();toast('Niveau d\'activité enregistré ✓');};
+  S.profile.act=v;save();renderProgPage();renderDays();toast('Niveau d\'activité enregistré ✓');};
 $('#saveProgActivites').onclick=()=>{
   const map={};
   $$('.act-kcal-inp').forEach(inp=>{const n=inp.dataset.act;if(n)map[n]=num(inp.value);});
