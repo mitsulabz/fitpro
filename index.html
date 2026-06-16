@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.5 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.6 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -717,13 +717,7 @@ function renderProgPage(){
       const ds=sel.dataset.ds;if(!ds)return;
       const v=sel.value;const d=getDay(ds);
       d.progActivity=(v==='')?false:{name:v,kcal:acts[v]||0};
-      save();
-      /* Mise à jour du chiffre dépensé sans re-render complet */
-      const sportK=v&&acts[v]!=null?acts[v]:0;
-      const dep=v?base+sportK:base;
-      const kspan=$$('.prog-jour-kcal[data-ds="'+ds+'"]')[0];
-      if(kspan){const cur=kspan.innerHTML.match(/<b style="color:var\(--ok\)">(.*?)<\/b>/);const eat=cur?cur[1]:'—';kspan.innerHTML='<b style="color:var(--ok)">'+eat+'</b> · <b style="color:var(--bad)">'+dep+'</b> kcal';}
-      renderDays();};});}}
+      save();renderProgPage();renderDays();};});}}
 
 /* ============================== JOURS ============================== */
 function getDay(ds){if(!S.days[ds])S.days[ds]={weight:'',act:S.profile.act||'1.30',sport:null,foods:[]};return S.days[ds];}
