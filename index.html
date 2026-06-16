@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.8 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.9 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -785,13 +785,14 @@ function renderDays(){
     const kcal=Math.round(dayKcal(day));const P=dayMacro(day,'p'),G=dayMacro(day,'g'),L=dayMacro(day,'l'),FI=dayMacro(day,'fi'),SEL=dayMacro(day,'sel');
     const logged=day.foods.length>0;
     const exp=dayExpend(day,ds);
-    const def=logged?(exp-kcal):0;
     const progDayC=getProgramDay(ds);const expForCum=progDayC?progDayC.calories_brulees:exp;
+    const defDisplay=logged?(expForCum-kcal):0;
+    const def=defDisplay;
     if(logged&&parseDS(ds)<todayD)cum+=(expForCum-kcal);
     const isToday=ds===today;
     let sumDef;
-    if(logged){const sm=def>=900?'🤩':def>=600?'😀':def>=300?'🙂':def>=0?'😐':'😞';
-      sumDef=sm+' <span class="sum-def '+(def>=0?'pos':'neg')+'">'+(def>=0?'+':'')+Math.round(def)+' kcal</span>';}
+    if(logged){const sm=defDisplay>=900?'🤩':defDisplay>=600?'😀':defDisplay>=300?'🙂':defDisplay>=0?'😐':'😞';
+      sumDef=sm+' <span class="sum-def '+(defDisplay>=0?'pos':'neg')+'">'+(defDisplay>=0?'+':'')+Math.round(defDisplay)+' kcal</span>';}
     else sumDef='<span class="muted">à compléter</span>';
     const actName=(getDayActivity(ds)||{}).name||'';const sportTxt=actName;
     /* sélecteur activité programme */
