@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.4 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.5 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -801,7 +801,7 @@ function renderDays(){
     let progOpts='<option value="">— Journée sans sport —</option><option value="Libre"'+libreSelProg+'>Libre — journée neutre</option>';
     Object.entries(acts).filter(([name])=>!isLibre(name)&&!isRepos(name)).forEach(([name,kcal])=>{const sel=(curAct&&curAct.name===name)?' selected':'';progOpts+='<option value="'+esc(name)+'"'+sel+'>'+esc(name)+' ('+Math.round(kcal)+' kcal)</option>';});
     const sportSel='<div class="field">📅 Programme <select class="progactsel" data-ds="'+ds+'">'+progOpts+'</select></div>';
-    const weightRow='<div class="field">⚖️ Poids <input class="inp xs wt" data-ds="'+ds+'" value="'+esc(day.weight||'')+'" placeholder="—"> kg</div>';
+    const weightRow='<div class="field">⚖️ Poids <input class="inp xs wt" data-ds="'+ds+'" value="'+esc(day.weight||'')+'" placeholder="—"> kg &nbsp; 💪 MG <input class="inp xs wbf" data-ds="'+ds+'" value="'+esc(day.bf||'')+'" placeholder="—"> %</div>';
 
     /* cible du jour : programme si disponible, sinon -20% de la dépense */
     const progDay=getProgramDay(ds);
@@ -909,6 +909,7 @@ function renderGoal(cum,range){
 function bindDayEvents(){
   $$('.progactsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;const acts=getProgramActivites();d.progActivity=(v==='')?false:{name:v,kcal:acts[v]||0};save();renderDays();});
   $$('.wt').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).weight=i.value.trim();save();renderDays();});
+  $$('.wbf').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).bf=i.value.trim();save();});
   $$('.rmf').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const d=getDay(b.dataset.ds);d.foods.splice(+b.dataset.fi,1);save();renderDays();});
   $$('.addfoodbtn').forEach(b=>b.onclick=()=>openFoodModal(b.dataset.ds));
 }
