@@ -97,7 +97,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 .inp{border:1px solid var(--line);border-radius:9px;padding:6px 9px;background:var(--bg);color:var(--ink);font-size:.88rem}
 .inp.sm{width:74px}.inp.xs{width:62px}
 .maskpct{color:var(--accent);font-weight:600}
-.sportsel,.actsel{border:1px solid var(--line);border-radius:9px;padding:6px 9px;background:var(--bg);color:var(--ink);font-size:.85rem}
+.sportsel,.actsel,.progactsel{border:1px solid var(--line);border-radius:9px;padding:6px 9px;background:var(--bg);color:var(--ink);font-size:.85rem}
 .mbar{display:flex;height:13px;border-radius:7px;overflow:hidden;margin:8px 0 6px}
 .mp{background:#79e8b3}.mg{background:#80b1ff}.ml{background:#ffc488}
 .mleg{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-bottom:8px}
@@ -276,16 +276,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
         <label>Poids cible (kg)</label>
         <input type="number" id="p_goalweight" min="30" max="300" step="0.1" placeholder="ex : 85">
       </div>
-      <div class="fld">
-        <label>Niveau d'activité hors sport (au quotidien)</label>
-        <select id="p_act"></select>
-      </div>
-      <div class="fld">
-        <label>Sport : heures par semaine (estimation)</label>
-        <input type="number" id="p_sporth" min="0" max="40" step="0.5" placeholder="ex : 4">
-      </div>
-      <div class="fld">
-      </div>
+
       <button class="btn block" id="saveProfile" style="margin-top:6px">Enregistrer le profil</button>
       <div class="kpi" id="kpi" style="margin-top:14px"></div>
       <p class="muted" style="font-size:.76rem;margin-top:10px" id="bmrNote"></p>
@@ -340,10 +331,32 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 
 <nav class="tabbar">
   <button class="active" data-tab="suivi"><span class="ic">📊</span>Suivi</button>
+  <button data-tab="programme"><span class="ic">📅</span>Programme</button>
   <button data-tab="aliments"><span class="ic">📋</span>Aliments</button>
   <button data-tab="amis"><span class="ic">👥</span>Amis</button>
   <button data-tab="reglages"><span class="ic">⚙️</span>Réglages</button>
 </nav>
+
+<!-- PAGE PROGRAMME -->
+<section class="page" id="page-programme">
+  <div class="card">
+    <h2 style="margin-top:0">Niveau d'activité de base</h2>
+    <p class="muted" style="font-size:.84rem">Ton métabolisme hors sport, utilisé pour les jours sans activité dans le programme.</p>
+    <select id="prog_act" style="width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--bg);color:var(--ink);font-size:.9rem"></select>
+    <button class="btn block" id="saveProgAct" style="margin-top:10px">Enregistrer</button>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Activités du programme</h2>
+    <p class="muted" style="font-size:.84rem">Ajuste les calories brûlées par activité. Ces valeurs s'appliquent à tous les jours correspondants.</p>
+    <div id="progActivitesList"></div>
+    <button class="btn block" id="saveProgActivites" style="margin-top:10px">Enregistrer les calories</button>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Jours du programme</h2>
+    <div id="progJoursList"></div>
+  </div>
+</section>
+
 
 <!-- FOOD MODAL -->
 <div class="modal" id="foodModal">
@@ -464,7 +477,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.1 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -604,11 +617,69 @@ function recDeficit(){const w=num(S.profile.weight);const tdee=estimatedTDEE();c
   const def=deficitFor(tdee);
   return {def,maint:tdee,intake:tdee-def,pct:DEFICIT_PCT,sport:dailySportEstimate()};}
 
+
+/* ============================== ACTIVITÉS PROGRAMME ============================== */
+function getProgramActivites(){
+  /* Extrait les activités uniques du programme avec leur dépense cible.
+     Priorité : S.programme.activites (customisé) > dérivé des jours */
+  if(!S.programme)return {};
+  if(S.programme.activites)return S.programme.activites;
+  const map={};
+  (S.programme.jours||[]).forEach(j=>{
+    const t=(j.type||'').trim();
+    if(t&&!(t in map))map[t]=j.calories_brulees||0;
+  });
+  return map;}
+
+function saveProgramActivites(map){
+  if(!S.programme)return;
+  S.programme.activites=map;
+  save();renderDays();}
+
+function getDayActivity(ds){
+  /* Retourne {name, kcal} pour un jour : override utilisateur ou programme par défaut */
+  const day=S.days[ds];
+  if(day&&day.progActivity)return day.progActivity; // override utilisateur
+  const progDay=getProgramDay(ds);
+  if(!progDay)return null;
+  return {name:progDay.type,kcal:progDay.calories_brulees};}
+
+function renderProgPage(){
+  if(!S.programme){
+    $('#progActivitesList').innerHTML='<p class="muted">Aucun programme chargé. Importe-en un dans Réglages.</p>';
+    $('#progJoursList').innerHTML='';
+    return;}
+  /* Niveau activité */
+  const progActSel=$('#prog_act');
+  if(progActSel){
+    progActSel.innerHTML=ACT_LEVELS.map(l=>'<option value="'+l.key+'">'+l.label+' — '+l.desc+'</option>').join('');
+    progActSel.value=migrateAct(S.profile.act||'1.30');}
+  /* Liste activités */
+  const acts=getProgramActivites();
+  const box=$('#progActivitesList');
+  if(box){
+    box.innerHTML=Object.entries(acts).map(([name,kcal])=>
+      '<div class="qtybar" style="margin-bottom:8px"><div class="fld" style="flex:2;margin-bottom:0"><span style="font-size:.9rem">'+esc(name)+'</span></div>'+
+      '<div class="fld" style="flex:1;margin-bottom:0"><input class="act-kcal-inp" data-act="'+esc(name)+'" type="number" value="'+Math.round(kcal)+'" min="0" step="10" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--ink)"></div>'+
+      '<span class="muted" style="align-self:center;font-size:.82rem">kcal</span></div>'
+    ).join('');}
+  /* Liste jours */
+  const jbox=$('#progJoursList');
+  if(jbox){
+    jbox.innerHTML=(S.programme.jours||[]).map(j=>{
+      const actKcal=acts[j.type]||j.calories_brulees||0;
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:.88rem">'+
+        '<span><b>'+esc(j.jour)+'</b> <span class="muted">· '+esc(j.type)+'</span></span>'+
+        '<span style="text-align:right;min-width:90px"><b>'+j.calories+'</b> kcal <span class="muted">/ '+actKcal+'</span></span></div>';
+    }).join('');}}
+
 /* ============================== JOURS ============================== */
 function getDay(ds){if(!S.days[ds])S.days[ds]={weight:'',act:S.profile.act||'1.30',sport:null,foods:[]};return S.days[ds];}
 function dayKcal(d){return d.foods.reduce((s,f)=>s+f.k,0);}
 function dayMacro(d,k){return d.foods.reduce((s,f)=>s+(f[k]||0),0);}
-function dayExpend(d){const sport=d.sport?num(d.sport.kcal):0;const b=bmr();const base=b?Math.round(b*actFactor(S.profile.act)):0;return base+sport;}
+function dayExpend(d,ds){/* ds optionnel : si fourni, utilise l'activité programme du jour */
+  if(ds){const act=getDayActivity(ds);if(act)return act.kcal||0;}
+  const sport=d.sport?num(d.sport.kcal):0;const b=bmr();const base=b?Math.round(b*actFactor(S.profile.act)):0;return base+sport;}
 function dayUsed(d){return d.foods.length||d.weight||d.sport;}
 function buildDayRange(){const keys=Object.keys(S.days);
   const today=new Date();today.setHours(0,0,0,0);
@@ -644,7 +715,7 @@ function renderDays(){
     const day=getDayRO(ds);
     const kcal=Math.round(dayKcal(day));const P=dayMacro(day,'p'),G=dayMacro(day,'g'),L=dayMacro(day,'l'),FI=dayMacro(day,'fi'),SEL=dayMacro(day,'sel');
     const logged=day.foods.length>0;
-    const exp=dayExpend(day);
+    const exp=dayExpend(day,ds);
     const def=logged?(exp-kcal):0;
     const progDayC=getProgramDay(ds);const expForCum=progDayC?progDayC.calories_brulees:exp;
     if(logged&&parseDS(ds)<todayD)cum+=(expForCum-kcal);
@@ -653,10 +724,13 @@ function renderDays(){
     if(logged){const sm=def>=900?'🤩':def>=600?'😀':def>=300?'🙂':def>=0?'😐':'😞';
       sumDef=sm+' <span class="sum-def '+(def>=0?'pos':'neg')+'">'+(def>=0?'+':'')+Math.round(def)+' kcal</span>';}
     else sumDef='<span class="muted">à compléter</span>';
-    const sportTxt=day.sport?(day.sport.name+(num(day.sport.kcal)?' '+Math.round(day.sport.kcal)+'kcal':'')):'';
-    let sportOpts='<option value="">— Repos / aucun —</option>';
-    S.sports.forEach((sp,i)=>{const sel=(day.sport&&day.sport.name===sp.name)?' selected':'';sportOpts+='<option value="'+i+'"'+sel+'>'+esc(sp.name)+' ('+sp.kcal+' kcal)</option>';});
-    const sportSel='<div class="field">🏃 Sport <select class="sportsel" data-ds="'+ds+'">'+sportOpts+'</select></div>';
+    const actName=(getDayActivity(ds)||{}).name||'';const sportTxt=actName;
+    /* sélecteur activité programme */
+    const acts=getProgramActivites();
+    const curAct=getDayActivity(ds);
+    let progOpts='<option value="">— Repos / aucun (BMR seul) —</option>';
+    Object.entries(acts).forEach(([name,kcal])=>{const sel=(curAct&&curAct.name===name)?' selected':'';progOpts+='<option value="'+esc(name)+'"'+sel+'>'+esc(name)+' ('+Math.round(kcal)+' kcal)</option>';});
+    const sportSel='<div class="field">📅 Programme <select class="progactsel" data-ds="'+ds+'">'+progOpts+'</select></div>';
     const weightRow='<div class="field">⚖️ Poids <input class="inp xs wt" data-ds="'+ds+'" value="'+esc(day.weight||'')+'" placeholder="—"> kg</div>';
 
     /* cible du jour : programme si disponible, sinon -20% de la dépense */
@@ -731,7 +805,7 @@ function renderGoal(cum,range){
 }
 
 function bindDayEvents(){
-  $$('.sportsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;d.sport=(v==='')?null:{name:S.sports[v].name,kcal:S.sports[v].kcal};save();renderDays();});
+  $$('.progactsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;const acts=getProgramActivites();d.progActivity=(v==='')?null:{name:v,kcal:acts[v]||0};save();renderDays();});
   $$('.wt').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).weight=i.value.trim();save();renderDays();});
   $$('.rmf').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const d=getDay(b.dataset.ds);d.foods.splice(+b.dataset.fi,1);save();renderDays();});
   $$('.addfoodbtn').forEach(b=>b.onclick=()=>openFoodModal(b.dataset.ds));
@@ -741,7 +815,7 @@ function bindDayEvents(){
 function switchTab(t){$$('.tabbar button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
   $$('.page').forEach(p=>p.classList.remove('active'));$('#page-'+t).classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
-  if(t==='amis')renderAmis();}
+  if(t==='amis')renderAmis();if(t==='programme')renderProgPage();}
 $$('.tabbar button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 $('#btnSettings').onclick=()=>switchTab('reglages');
 function applyTheme(){document.documentElement.setAttribute('data-theme',S.theme);$('#btnTheme').textContent=S.theme==='dark'?'☀️':'🌙';}
@@ -769,10 +843,8 @@ window.addEventListener('focus',checkForUpdate);
 /* ============================== REGLAGES : PROFIL ============================== */
 function updateGoalModeUI(){const m=$('#p_goalmode').value;$('#goalweight_field').style.display=m==='weight'?'':'none';$('#bft_field').style.display=m==='weight'?'none':'';}
 function fillProfile(){const p=S.profile;
-  $('#p_act').innerHTML=ACT_LEVELS.map(l=>'<option value="'+l.key+'">'+l.label+' — '+l.desc+'</option>').join('');
   $('#p_age').value=p.age;$('#p_sex').value=p.sex;$('#p_height').value=p.height;
   $('#p_weight').value=p.weight;$('#p_bf').value=p.bf;$('#p_bft').value=p.bft;
-  $('#p_act').value=migrateAct(p.act||'1.30');$('#p_sporth').value=p.sportHours||'';
   $('#p_goalmode').value=p.goalMode||'bf';$('#p_goalweight').value=p.goalWeight||'';
   $('#p_sharehistory').checked=!!p.shareHistory;
   updateGoalModeUI();renderKPI();}
@@ -786,7 +858,7 @@ function renderKPI(){const b=bmr();const tdee=estimatedTDEE();const g=goalCalc()
   $('#kpi').innerHTML=h;
   $('#bmrNote').textContent=(S.profile.bf?'Métabolisme via Katch-McArdle (masse maigre). ':'Métabolisme via Mifflin-St-Jeor (renseigne ton % de masse grasse pour plus de précision). ')+'La dépense estimée sert à la projection ; le suivi quotidien utilise ta dépense réelle.';}
 $('#saveProfile').onclick=()=>{const p=S.profile;p.age=$('#p_age').value;p.sex=$('#p_sex').value;p.height=$('#p_height').value;
-  p.weight=$('#p_weight').value;p.bf=$('#p_bf').value;p.bft=$('#p_bft').value;p.act=$('#p_act').value;p.sportHours=$('#p_sporth').value;
+  p.weight=$('#p_weight').value;p.bf=$('#p_bf').value;p.bft=$('#p_bft').value;
   p.goalMode=$('#p_goalmode').value;p.goalWeight=$('#p_goalweight').value;
   save();renderKPI();renderDays();toast('Profil enregistré ✓');};
 $('#savePrivacy').onclick=()=>{const p=S.profile;p.shareHistory=$('#p_sharehistory').checked;save();toast('Préférences enregistrées ✓');};
@@ -817,6 +889,15 @@ function renderProgStatus(){
 $('#importProg').onclick=()=>$('#progFile').click();
 $('#progFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.jours||!Array.isArray(o.jours))throw new Error();S.programme=o;save();renderProgStatus();renderDays();toast('Programme importé ✓');}catch(err){alert('Fichier de programme invalide.');}};r.readAsText(f);};
 $('#clearProg').onclick=()=>{if(confirm('Supprimer le programme ?')){S.programme=null;save();renderProgStatus();renderDays();toast('Programme supprimé');}};
+
+/* ============================== HANDLERS PAGE PROGRAMME ============================== */
+$('#saveProgAct').onclick=()=>{
+  const v=$('#prog_act').value;if(!v)return;
+  S.profile.act=v;save();renderDays();toast('Niveau d\'activité enregistré ✓');};
+$('#saveProgActivites').onclick=()=>{
+  const map={};
+  $$('.act-kcal-inp').forEach(inp=>{const n=inp.dataset.act;if(n)map[n]=num(inp.value);});
+  saveProgramActivites(map);toast('Calories activités enregistrées ✓');renderProgPage();};
 
 /* ============================== FAVORIS (onglet Aliments) ============================== */
 function renderFav(){const box=$('#favList');
