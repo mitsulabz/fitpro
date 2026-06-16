@@ -314,6 +314,26 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
     </div>
     <p class="muted" style="font-size:.74rem;text-align:center" id="buildStamp">FitNoob · données 100 % locales</p>
   </section>
+
+  <!-- PAGE PROGRAMME -->
+  <section class="page" id="page-programme">
+    <div class="card">
+      <h2 style="margin-top:0">Niveau d'activité de base</h2>
+      <p class="muted" style="font-size:.84rem">Ton métabolisme hors sport, utilisé pour les jours sans activité dans le programme.</p>
+      <select id="prog_act" style="width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--bg);color:var(--ink);font-size:.9rem"></select>
+      <button class="btn block" id="saveProgAct" style="margin-top:10px">Enregistrer</button>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Activités du programme</h2>
+      <p class="muted" style="font-size:.84rem">Ajuste les calories brûlées par activité. Ces valeurs s'appliquent à tous les jours correspondants.</p>
+      <div id="progActivitesList"></div>
+      <button class="btn block" id="saveProgActivites" style="margin-top:10px">Enregistrer les calories</button>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Jours du programme</h2>
+      <div id="progJoursList"></div>
+    </div>
+  </section>
 </main>
 
 <nav class="tabbar">
@@ -323,26 +343,6 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
   <button data-tab="amis"><span class="ic">👥</span>Amis</button>
   <button data-tab="reglages"><span class="ic">⚙️</span>Réglages</button>
 </nav>
-
-<!-- PAGE PROGRAMME -->
-<section class="page" id="page-programme">
-  <div class="card">
-    <h2 style="margin-top:0">Niveau d'activité de base</h2>
-    <p class="muted" style="font-size:.84rem">Ton métabolisme hors sport, utilisé pour les jours sans activité dans le programme.</p>
-    <select id="prog_act" style="width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--bg);color:var(--ink);font-size:.9rem"></select>
-    <button class="btn block" id="saveProgAct" style="margin-top:10px">Enregistrer</button>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Activités du programme</h2>
-    <p class="muted" style="font-size:.84rem">Ajuste les calories brûlées par activité. Ces valeurs s'appliquent à tous les jours correspondants.</p>
-    <div id="progActivitesList"></div>
-    <button class="btn block" id="saveProgActivites" style="margin-top:10px">Enregistrer les calories</button>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0">Jours du programme</h2>
-    <div id="progJoursList"></div>
-  </div>
-</section>
 
 
 <!-- FOOD MODAL -->
@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.7b · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.8 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
