@@ -477,7 +477,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.2 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.3 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -620,14 +620,16 @@ function recDeficit(){const w=num(S.profile.weight);const tdee=estimatedTDEE();c
 
 /* ============================== ACTIVITÉS PROGRAMME ============================== */
 function getProgramActivites(){
-  /* Extrait les activités uniques du programme avec leur dépense cible.
-     Priorité : S.programme.activites (customisé) > dérivé des jours */
+  /* Extrait les activités uniques du programme avec leurs calories SPORT SEULEMENT
+     (= calories_brulees - BMR×actBase). Priorité : customisé > dérivé du JSON.
+     Les calories stockées ici sont le delta sport, pas le total journée. */
   if(!S.programme)return {};
   if(S.programme.activites)return S.programme.activites;
+  const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
   const map={};
   (S.programme.jours||[]).forEach(j=>{
     const t=(j.type||'').trim();
-    if(t&&!(t in map))map[t]=j.calories_brulees||0;
+    if(t&&!(t in map))map[t]=Math.max(0,(j.calories_brulees||0)-base);
   });
   return map;}
 
@@ -679,9 +681,10 @@ function renderProgPage(){
 function getDay(ds){if(!S.days[ds])S.days[ds]={weight:'',act:S.profile.act||'1.30',sport:null,foods:[]};return S.days[ds];}
 function dayKcal(d){return d.foods.reduce((s,f)=>s+f.k,0);}
 function dayMacro(d,k){return d.foods.reduce((s,f)=>s+(f[k]||0),0);}
-function dayExpend(d,ds){/* ds optionnel : si fourni, utilise l'activité programme du jour */
-  if(ds){const act=getDayActivity(ds);if(act)return act.kcal||0;}
-  const sport=d.sport?num(d.sport.kcal):0;const b=bmr();const base=b?Math.round(b*actFactor(S.profile.act)):0;return base+sport;}
+function dayExpend(d,ds){/* BMR × actBase + sportKcal (activité du jour, sport seulement) */
+  const b=bmr();const base=b?Math.round(b*actFactor(S.profile.act||'1.30')):0;
+  if(ds){const act=getDayActivity(ds);if(act)return base+(act.kcal||0);}
+  return base;}
 function dayUsed(d){return d.foods.length||d.weight||d.sport;}
 function buildDayRange(){const keys=Object.keys(S.days);
   const today=new Date();today.setHours(0,0,0,0);
