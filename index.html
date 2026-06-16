@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.9 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -788,7 +788,7 @@ function renderDays(){
     const progDayC=getProgramDay(ds);const expForCum=progDayC?progDayC.calories_brulees:exp;
     const defDisplay=logged?(expForCum-kcal):0;
     const def=defDisplay;
-    if(logged&&parseDS(ds)<todayD)cum+=(expForCum-kcal);
+    if(logged&&parseDS(ds)<todayD&&progDayC)cum+=(expForCum-kcal);
     const isToday=ds===today;
     let sumDef;
     if(logged){const sm=defDisplay>=900?'🤩':defDisplay>=600?'😀':defDisplay>=300?'🙂':defDisplay>=0?'😐':'😞';
@@ -1244,7 +1244,7 @@ function buildCoachSummary(){
   /* 14 derniers jours loggés (programme ou non) pour la dépense estimée */
   const range=buildDayRange();
   const loggedPast=range.filter(ds=>{const d2=parseDS(ds);return d2&&d2<today&&S.days[ds]&&S.days[ds].foods&&S.days[ds].foods.length;});
-  let cum=0;loggedPast.forEach(ds=>{const d=S.days[ds];const pd=getProgramDay(ds);const exp=pd?pd.calories_brulees:dayExpend(d);cum+=exp-Math.round(dayKcal(d));});
+  let cum=0;loggedPast.forEach(ds=>{const d=S.days[ds];const pd=getProgramDay(ds);if(!pd)return;const exp=pd.calories_brulees;cum+=exp-Math.round(dayKcal(d));});
   return {
     profil:{sexe:S.profile.sex,age:num(S.profile.age),poids_kg:num(S.profile.weight),masse_grasse_pct:num(S.profile.bf)},
     programme:{
