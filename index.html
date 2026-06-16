@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.7 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.7b · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -872,11 +872,11 @@ function fillProfile(){const p=S.profile;
   $('#p_sharehistory').checked=!!p.shareHistory;
   updateGoalModeUI();}
 $('#p_goalmode').onchange=updateGoalModeUI;
-$(‘#saveProfile’).onclick=()=>{const p=S.profile;p.age=$(‘#p_age’).value;p.sex=$(‘#p_sex’).value;p.height=$(‘#p_height’).value;
-  p.weight=$(‘#p_weight’).value;p.bf=$(‘#p_bf’).value;p.bft=$(‘#p_bft’).value;
-  p.goalMode=$(‘#p_goalmode’).value;p.goalWeight=$(‘#p_goalweight’).value;
-  save();renderDays();toast(‘Profil enregistré ✓’);};
-$(‘#savePrivacy’).onclick=()=>{const p=S.profile;p.shareHistory=$(‘#p_sharehistory’).checked;save();toast(‘Préférences enregistrées ✓’);};
+$('#saveProfile').onclick=()=>{const p=S.profile;p.age=$('#p_age').value;p.sex=$('#p_sex').value;p.height=$('#p_height').value;
+  p.weight=$('#p_weight').value;p.bf=$('#p_bf').value;p.bft=$('#p_bft').value;
+  p.goalMode=$('#p_goalmode').value;p.goalWeight=$('#p_goalweight').value;
+  save();renderDays();toast('Profil enregistré ✓');};
+$('#savePrivacy').onclick=()=>{const p=S.profile;p.shareHistory=$('#p_sharehistory').checked;save();toast('Préférences enregistrées ✓');};
 
 /* données export/import/reset */
 $('#exportData').onclick=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fitnoob-data-'+dstr(new Date()).replace(/\//g,'-')+'.json';a.click();};
