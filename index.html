@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.3 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.4 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -872,20 +872,27 @@ function renderGoal(cum,range){
   const remaining=Math.max(0,(g.kcal||0)-cum);
   const projDate=S.programme?projDateFromProgramme(remaining):null;
   const progEnd=programmeEndDate();
-  if(S.programme&&projDate){
-    const fin=frShort(projDate);
-    p2='\U0001f3af En suivant ton programme, tu accumuleras le deficit necessaire pour atteindre <b>'+bft+' % de masse grasse</b> le <b>'+fin+'</b>.';
-    short2='\U0001f4aa En tryhardant au max, je serai bogoss le <b>'+fin+'</b>';
-  }else if(S.programme&&progEnd){
-    const fin=frShort(progEnd);
-    p2='\U0001f3af Ton programme se termine le <b>'+fin+'</b>, mais il ne couvre pas encore tout le deficit necessaire. Continue au-dela !';
-    short2='\U0001f4aa Programme jusqu\'au <b>'+fin+'</b> — puis continuer';
+  if(S.programme&&daysWithProg>0){
+    const velo=(surplusVsProg/500).toFixed(1);
+    if(surplusVsProg>50){
+      p2='🚴 Retard de <b>'+Math.round(surplusVsProg)+' kcal</b> par rapport au rythme du programme. Pour rattraper : <b>'+velo+' h de vélo</b> supplémentaire (≈ 500 kcal/h).';
+      short2='🚴 Retard de '+Math.round(surplusVsProg)+' kcal = <b>'+velo+' h de vélo</b>';
+    }else if(surplusVsProg<-50){
+      p2='🚀 En avance de <b>'+Math.round(Math.abs(surplusVsProg))+' kcal</b> sur le rythme du programme. Excellent, continue !';
+      short2='✅ En avance de '+Math.round(Math.abs(surplusVsProg))+' kcal sur le programme';
+    }else{
+      p2='✅ Tu suis ton programme à la perfection. Déficit cumulé conforme à la cible.';
+      short2='✅ Rythme parfaitement conforme au programme';
+    }
+  }else if(S.programme){
+    p2='📊 Commence à logger tes journées pour comparer ton rythme avec le programme.';
+    short2='📊 Logge tes journées pour comparer';
   }else{
     const rec=recDeficit();
     if(rec){
       const finD2=r=>{if(r<=0)return '—';const dl=(g.kcal-cum)/r;if(dl<=0)return 'déjà atteint 🎉';return frShort(new Date(today.getTime()+dl*86400000));};
-      p2='🎯 En tenant un déficit de <b>'+rec.def+' kcal/jour</b> (manger ~'+rec.intake+' kcal/j), tu atteins <b>'+bft+' % de masse grasse</b> le <b>'+finD2(rec.def)+'</b>.';
-      short2='💪 En tryhardant au max, je serai bogoss le <b>'+finD2(rec.def)+'</b>';
+      p2='🎯 En tenant un déficit de <b>'+rec.def+' kcal/jour</b> (manger ~'+rec.intake+' kcal/j), tu atteins ton objectif le <b>'+finD2(rec.def)+'</b>.';
+      short2='💪 Objectif le <b>'+finD2(rec.def)+'</b>';
     }else{p2='🎯 Complète ton profil pour estimer ta date d\'atteinte.';short2='🎯 Complète ton profil pour estimer';}
   }
   const goalLabel='🎯 Déficit à atteindre : <b>'+Math.round(g.kcal).toLocaleString('fr-FR')+'</b> kcal'+(g.endDate?' d\'ici le <b>'+frShort(g.endDate)+'</b>':'');
