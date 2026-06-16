@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.0b · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.1 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -681,9 +681,11 @@ function renderProgPage(){
   if(jbox){
     const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
     const actOpts=['<option value="">— Repos (BMR×base) —</option>'].concat(Object.entries(acts).map(([name,kcal])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>')).join('');
-    const header='<div style="display:flex;justify-content:space-between;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600">'+
+    const header='<div style="display:flex;align-items:center;gap:6px;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600">'+
       '<span style="flex:1">Jour</span><span style="flex:1">Activité</span>'+
-      '<span style="text-align:right;min-width:130px"><span style="color:var(--ok)">Je mange</span> · <span style="color:var(--bad)">Je brûle</span></span></div>';
+      '<span style="text-align:right;min-width:130px"><span style="color:var(--ok)">Je mange</span> · <span style="color:var(--bad)">Je brule</span></span>'+
+      '<span style="text-align:right;min-width:110px">Cum. · Gras</span></div>';
+    let cumDef=0;
     jbox.innerHTML=header+(S.programme.jours||[]).map(j=>{
       const ds=jourToDS(j.jour)||'';
       const dayOverride=ds&&S.days[ds]?S.days[ds].progActivity:undefined;
@@ -691,10 +693,16 @@ function renderProgPage(){
       const sportKcal=curName&&acts[curName]!=null?acts[curName]:Math.max(0,(j.calories_brulees||0)-base);
       const depense=curName?base+sportKcal:base;
       const opts=actOpts.replace('value="'+esc(curName)+'"','value="'+esc(curName)+'" selected');
+      const dayDef=depense-(j.calories||0);
+      cumDef+=dayDef;
+      const fatG=cumDef/7.7;
+      const fatStr=Math.abs(fatG)>=1000?(fatG/1000).toFixed(2)+' kg':(Math.round(fatG))+' g';
+      const cumCol=cumDef>=0?'var(--ok)':'var(--bad)';
       return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.85rem" data-ds="'+esc(ds)+'">'+
         '<span style="flex:1"><b>'+esc(j.jour)+'</b></span>'+
         '<select class="prog-jour-actsel" data-ds="'+esc(ds)+'" data-deftype="'+esc(j.type)+'" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink);font-size:.8rem">'+opts+'</select>'+
-        '<span class="prog-jour-kcal" data-ds="'+esc(ds)+'" style="text-align:right;min-width:130px"><b style="color:var(--ok)">'+j.calories+'</b> · <b style="color:var(--bad)">'+depense+'</b> kcal</span></div>';
+        '<span class="prog-jour-kcal" data-ds="'+esc(ds)+'" style="text-align:right;min-width:130px"><b style="color:var(--ok)">'+j.calories+'</b> · <b style="color:var(--bad)">'+depense+'</b> kcal</span>'+
+        '<span style="text-align:right;min-width:110px;font-size:.8rem"><b style="color:'+cumCol+'">'+Math.round(cumDef)+'</b> kcal<br><span class="muted">'+fatStr+'</span></span></div>';
     }).join('');
     /* binding des sélecteurs de la liste jours */
     $$('.prog-jour-actsel').forEach(sel=>{sel.onchange=()=>{
