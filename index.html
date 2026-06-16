@@ -477,7 +477,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.1 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.2 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -637,9 +637,11 @@ function saveProgramActivites(map){
   save();renderDays();}
 
 function getDayActivity(ds){
-  /* Retourne {name, kcal} pour un jour : override utilisateur ou programme par défaut */
+  /* Retourne {name,kcal} ou null (→ BMR×act de base).
+     false = repos explicite choisi par l'utilisateur → null → BMR×act */
   const day=S.days[ds];
-  if(day&&day.progActivity)return day.progActivity; // override utilisateur
+  if(day&&day.progActivity===false)return null;
+  if(day&&day.progActivity)return day.progActivity;
   const progDay=getProgramDay(ds);
   if(!progDay)return null;
   return {name:progDay.type,kcal:progDay.calories_brulees};}
@@ -805,7 +807,7 @@ function renderGoal(cum,range){
 }
 
 function bindDayEvents(){
-  $$('.progactsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;const acts=getProgramActivites();d.progActivity=(v==='')?null:{name:v,kcal:acts[v]||0};save();renderDays();});
+  $$('.progactsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;const acts=getProgramActivites();d.progActivity=(v==='')?false:{name:v,kcal:acts[v]||0};save();renderDays();});
   $$('.wt').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).weight=i.value.trim();save();renderDays();});
   $$('.rmf').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const d=getDay(b.dataset.ds);d.foods.splice(+b.dataset.fi,1);save();renderDays();});
   $$('.addfoodbtn').forEach(b=>b.onclick=()=>openFoodModal(b.dataset.ds));
