@@ -1,0 +1,1150 @@
+{
+  "profile": {
+    "age": 43,
+    "sex": "h",
+    "height": 180,
+    "weight": 100.6,
+    "bf": 30,
+    "bft": 20,
+    "act": "1.20",
+    "sportHours": 4
+  },
+  "sports": [
+    {
+      "name": "Badminton",
+      "kcal": 500
+    },
+    {
+      "name": "Escrime",
+      "kcal": 950
+    },
+    {
+      "name": "Vélo elliptique",
+      "kcal": 280
+    }
+  ],
+  "favorites": [
+    {
+      "name": "oeuf bio",
+      "per": "unit",
+      "kcal": 70,
+      "p": 6,
+      "g": 0.5,
+      "l": 5,
+      "img": ""
+    },
+    {
+      "name": "Avocat hass calibre 22 bio",
+      "per": "unit",
+      "kcal": 190,
+      "p": 2.5,
+      "g": 10,
+      "l": 17,
+      "img": ""
+    },
+    {
+      "name": "Baguette pain 50g",
+      "per": "unit",
+      "kcal": 140,
+      "p": 4,
+      "g": 27,
+      "l": 1,
+      "img": ""
+    },
+    {
+      "name": "banane mure bio",
+      "per": "unit",
+      "kcal": 100,
+      "p": 1.3,
+      "g": 27,
+      "l": 0.3,
+      "img": ""
+    },
+    {
+      "name": "Beurre sans lactose",
+      "per": "unit",
+      "kcal": 75,
+      "p": 0,
+      "g": 0,
+      "l": 8,
+      "img": ""
+    },
+    {
+      "name": "Bounty 1/2",
+      "per": "unit",
+      "kcal": 139,
+      "p": 1.1,
+      "g": 17,
+      "l": 7.3,
+      "img": ""
+    },
+    {
+      "name": "Box mix sushis maki 400g",
+      "per": "unit",
+      "kcal": 750,
+      "p": 35,
+      "g": 90,
+      "l": 25,
+      "img": ""
+    },
+    {
+      "name": "camembert portion",
+      "per": "unit",
+      "kcal": 110,
+      "p": 6,
+      "g": 0,
+      "l": 9,
+      "img": ""
+    },
+    {
+      "name": "Caprice des dieux",
+      "per": "unit",
+      "kcal": 115,
+      "p": 5,
+      "g": 0,
+      "l": 10,
+      "img": ""
+    },
+    {
+      "name": "Carotte cuite",
+      "per": "100",
+      "kcal": 35,
+      "p": 0.8,
+      "g": 8,
+      "l": 0.2,
+      "img": ""
+    },
+    {
+      "name": "Chevre buche",
+      "per": "unit",
+      "kcal": 110,
+      "p": 7,
+      "g": 1,
+      "l": 8,
+      "img": ""
+    },
+    {
+      "name": "Chocofresh",
+      "per": "unit",
+      "kcal": 119,
+      "p": 1.5,
+      "g": 8.2,
+      "l": 8.8,
+      "img": ""
+    },
+    {
+      "name": "Chocolat au lait",
+      "per": "100",
+      "kcal": 540,
+      "p": 8,
+      "g": 55,
+      "l": 30,
+      "img": ""
+    },
+    {
+      "name": "Emmental rapé",
+      "per": "unit",
+      "kcal": 80,
+      "p": 6,
+      "g": 0,
+      "l": 6,
+      "img": ""
+    },
+    {
+      "name": "frite moitié paket",
+      "per": "unit",
+      "kcal": 360,
+      "p": 7.5,
+      "g": 51,
+      "l": 13,
+      "img": ""
+    },
+    {
+      "name": "Biscuit granola",
+      "per": "unit",
+      "kcal": 66,
+      "p": 0.8,
+      "g": 8.5,
+      "l": 3.1,
+      "img": ""
+    },
+    {
+      "name": "Haricot vert cuit",
+      "per": "100",
+      "kcal": 30,
+      "p": 2,
+      "g": 6,
+      "l": 0.2,
+      "img": ""
+    },
+    {
+      "name": "Kinder bueno",
+      "per": "unit",
+      "kcal": 244,
+      "p": 3.8,
+      "g": 21,
+      "l": 16,
+      "img": ""
+    },
+    {
+      "name": "Kinder surprise",
+      "per": "unit",
+      "kcal": 110,
+      "p": 1.6,
+      "g": 10.5,
+      "l": 6.8,
+      "img": ""
+    },
+    {
+      "name": "lait pour whey",
+      "per": "unit",
+      "kcal": 110,
+      "p": 8,
+      "g": 12,
+      "l": 3,
+      "img": ""
+    },
+    {
+      "name": "Plat Lentille tofu monop",
+      "per": "unit",
+      "kcal": 318,
+      "p": 16,
+      "g": 20,
+      "l": 18,
+      "img": ""
+    },
+    {
+      "name": "Lu guetapen chocolat",
+      "per": "unit",
+      "kcal": 510,
+      "p": 5.4,
+      "g": 58,
+      "l": 28,
+      "img": ""
+    },
+    {
+      "name": "Mayonnaise 1cas",
+      "per": "unit",
+      "kcal": 100,
+      "p": 0.2,
+      "g": 0.5,
+      "l": 11,
+      "img": ""
+    },
+    {
+      "name": "Mini taboulet bonduelle",
+      "per": "unit",
+      "kcal": 181,
+      "p": 4.9,
+      "g": 22,
+      "l": 7.7,
+      "img": ""
+    },
+    {
+      "name": "Pain mie blanc",
+      "per": "unit",
+      "kcal": 70,
+      "p": 2,
+      "g": 12,
+      "l": 1,
+      "img": ""
+    },
+    {
+      "name": "parmesan",
+      "per": "unit",
+      "kcal": 60,
+      "p": 5,
+      "g": 0,
+      "l": 4,
+      "img": ""
+    },
+    {
+      "name": "Pastabox sauce au poivre",
+      "per": "unit",
+      "kcal": 515,
+      "p": 23.4,
+      "g": 53,
+      "l": 24,
+      "img": ""
+    },
+    {
+      "name": "Pates cuites",
+      "per": "100",
+      "kcal": 140,
+      "p": 0,
+      "g": 0,
+      "l": 0,
+      "img": ""
+    },
+    {
+      "name": "Poisson pané",
+      "per": "100",
+      "kcal": 234,
+      "p": 14,
+      "g": 17,
+      "l": 12,
+      "img": ""
+    },
+    {
+      "name": "Pomme de terre cuite",
+      "per": "100",
+      "kcal": 80,
+      "p": 2,
+      "g": 17,
+      "l": 0.1,
+      "img": ""
+    },
+    {
+      "name": "Pot choco laitiere",
+      "per": "unit",
+      "kcal": 179,
+      "p": 4.7,
+      "g": 17.6,
+      "l": 9.9,
+      "img": ""
+    },
+    {
+      "name": "Poulet pané le gaulois",
+      "per": "100",
+      "kcal": 250,
+      "p": 14,
+      "g": 15,
+      "l": 14,
+      "img": ""
+    },
+    {
+      "name": "Riz basmati (cuit)",
+      "per": "100",
+      "kcal": 120,
+      "p": 2.5,
+      "g": 25,
+      "l": 0.3,
+      "img": ""
+    },
+    {
+      "name": "Sandiwch poulet comcombre monop",
+      "per": "unit",
+      "kcal": 277,
+      "p": 11,
+      "g": 24,
+      "l": 15,
+      "img": ""
+    },
+    {
+      "name": "Sauce soja salée",
+      "per": "unit",
+      "kcal": 15,
+      "p": 0,
+      "g": 0,
+      "l": 0,
+      "img": ""
+    },
+    {
+      "name": "Saumon cuit bio",
+      "per": "unit",
+      "kcal": 260,
+      "p": 29,
+      "g": 0,
+      "l": 16,
+      "img": ""
+    },
+    {
+      "name": "Sandwich Stellato Saumon",
+      "per": "unit",
+      "kcal": 491,
+      "p": 20.8,
+      "g": 33.6,
+      "l": 28.8,
+      "img": ""
+    },
+    {
+      "name": "Sandwich Stellato thon olive",
+      "per": "unit",
+      "kcal": 366,
+      "p": 15.6,
+      "g": 31.7,
+      "l": 18.5,
+      "img": ""
+    },
+    {
+      "name": "Sundy barre chocolat",
+      "per": "unit",
+      "kcal": 250,
+      "p": 3,
+      "g": 27,
+      "l": 14,
+      "img": ""
+    },
+    {
+      "name": "Boite de Thon a l’huile",
+      "per": "unit",
+      "kcal": 95,
+      "p": 12,
+      "g": 0,
+      "l": 4,
+      "img": ""
+    },
+    {
+      "name": "Sandwich Mousse de thon monop",
+      "per": "unit",
+      "kcal": 294,
+      "p": 13,
+      "g": 26,
+      "l": 15,
+      "img": ""
+    },
+    {
+      "name": "Salade Torti comcombre",
+      "per": "unit",
+      "kcal": 564,
+      "p": 16.5,
+      "g": 42,
+      "l": 36,
+      "img": ""
+    },
+    {
+      "name": "whey 30g",
+      "per": "unit",
+      "kcal": 116,
+      "p": 22,
+      "g": 3,
+      "l": 1,
+      "img": ""
+    },
+    {
+      "name": "Steak haché Biocoop 15% mg",
+      "per": "100",
+      "kcal": 200,
+      "p": 19,
+      "g": 0.5,
+      "l": 14,
+      "img": ""
+    },
+    {
+      "name": "lait amande pour whey",
+      "per": "unit",
+      "kcal": 110,
+      "p": 8,
+      "g": 12,
+      "l": 3,
+      "img": ""
+    },
+    {
+      "name": "Sauce giant de Quick",
+      "per": "100",
+      "kcal": 675,
+      "p": 1,
+      "g": 3.5,
+      "l": 72,
+      "img": ""
+    },
+    {
+      "name": "Ficello",
+      "per": "100",
+      "kcal": 304,
+      "p": 23,
+      "g": 2.5,
+      "l": 22.5,
+      "img": ""
+    },
+    {
+      "name": "Yaourt (pot 125g)",
+      "per": "unit",
+      "kcal": 120,
+      "p": 3.6,
+      "g": 18.2,
+      "l": 3.5,
+      "img": ""
+    },
+    {
+      "name": "Pepito (1 biscuit)",
+      "per": "unit",
+      "kcal": 62,
+      "p": 0.8,
+      "g": 8.2,
+      "l": 2.6,
+      "img": ""
+    },
+    {
+      "name": "Sodebo All'Italiana pesto verde (280g)",
+      "per": "unit",
+      "kcal": 553,
+      "p": 21,
+      "g": 53,
+      "l": 27,
+      "img": ""
+    },
+    {
+      "name": "Danonino (1 pot 100g)",
+      "per": "100",
+      "kcal": 104,
+      "p": 5.8,
+      "g": 13,
+      "l": 2.4,
+      "img": ""
+    },
+    {
+      "name": "Pain burger (commerce)",
+      "per": "unit",
+      "kcal": 155,
+      "p": 5,
+      "g": 28,
+      "l": 3,
+      "img": ""
+    },
+    {
+      "name": "Cheddar fondu (1 tranche)",
+      "per": "unit",
+      "kcal": 65,
+      "p": 3.5,
+      "g": 0.5,
+      "l": 5,
+      "img": ""
+    },
+    {
+      "name": "Lait d'amande sans sucre (250ml)",
+      "per": "unit",
+      "kcal": 35,
+      "p": 1,
+      "g": 0.5,
+      "l": 3,
+      "img": ""
+    },
+    {
+      "name": "Saucisson sec (1 tranche)",
+      "per": "unit",
+      "kcal": 22,
+      "p": 1.1,
+      "g": 0.1,
+      "l": 1.9,
+      "img": ""
+    },
+    {
+      "name": "Croque-monsieur (1/2)",
+      "per": "unit",
+      "kcal": 220,
+      "p": 11,
+      "g": 18,
+      "l": 11,
+      "img": ""
+    },
+    {
+      "name": "Tartine thon œuf (1)",
+      "per": "unit",
+      "kcal": 90,
+      "p": 5,
+      "g": 7,
+      "l": 4,
+      "img": ""
+    },
+    {
+      "name": "Saucisse Knacki (1)",
+      "per": "unit",
+      "kcal": 75,
+      "p": 3,
+      "g": 0.5,
+      "l": 6.5,
+      "img": ""
+    },
+    {
+      "name": "Croissant (1/2)",
+      "per": "unit",
+      "kcal": 120,
+      "p": 2.5,
+      "g": 13,
+      "l": 6.5,
+      "img": ""
+    },
+    {
+      "name": "Jus multivitamine (1 verre 200ml)",
+      "per": "unit",
+      "kcal": 95,
+      "p": 0.5,
+      "g": 23,
+      "l": 0,
+      "img": ""
+    },
+    {
+      "name": "Clafoutis (1 portion)",
+      "per": "unit",
+      "kcal": 131,
+      "p": 0.4,
+      "g": 20.9,
+      "l": 6,
+      "img": ""
+    },
+    {
+      "name": "Raviolis au chèvre (100g)",
+      "per": "100",
+      "kcal": 249,
+      "p": 10,
+      "g": 32,
+      "l": 8,
+      "img": ""
+    },
+    {
+      "name": "Mozzarella (1 tranche 25g)",
+      "per": "unit",
+      "kcal": 77,
+      "p": 7,
+      "g": 0.3,
+      "l": 5.3,
+      "img": ""
+    },
+    {
+      "name": "Gouda (1 tranche ~20g)",
+      "per": "unit",
+      "kcal": 71,
+      "p": 5,
+      "g": 0,
+      "l": 5.5,
+      "img": ""
+    },
+    {
+      "name": "Pain (30g)",
+      "per": "unit",
+      "kcal": 84,
+      "p": 2.4,
+      "g": 16,
+      "l": 0.6,
+      "img": ""
+    },
+    {
+      "name": "Sandwich thon mayo œuf (boulangerie)",
+      "per": "unit",
+      "kcal": 750,
+      "p": 35,
+      "g": 85,
+      "l": 30,
+      "img": ""
+    },
+    {
+      "name": "Salade Sodebo Antibes (complète)",
+      "per": "unit",
+      "kcal": 627,
+      "p": 20,
+      "g": 65,
+      "l": 30,
+      "img": ""
+    }
+  ],
+  "days": {
+    "08/06/2026": {
+      "weight": 101,
+      "act": "1.40",
+      "sport": {
+        "name": "Badminton",
+        "kcal": 500
+      },
+      "foods": [
+        {
+          "n": "2 biscuits Granola",
+          "k": 132,
+          "p": 5,
+          "g": 15.2,
+          "l": 5.3
+        },
+        {
+          "n": "Box sushi 400g",
+          "k": 750,
+          "p": 28.4,
+          "g": 86.3,
+          "l": 30.3
+        },
+        {
+          "n": "Ficello 100g",
+          "k": 304,
+          "p": 11.5,
+          "g": 35,
+          "l": 12.3
+        },
+        {
+          "n": "Pomme de terre 330g",
+          "k": 264,
+          "p": 10,
+          "g": 30.4,
+          "l": 10.7
+        },
+        {
+          "n": "Noix de beurre ~10g",
+          "k": 75,
+          "p": 2.8,
+          "g": 8.6,
+          "l": 3
+        },
+        {
+          "n": "5 Pepito",
+          "k": 310,
+          "p": 11.7,
+          "g": 35.7,
+          "l": 12.5
+        },
+        {
+          "n": "Yaourt 125g",
+          "k": 120,
+          "p": 4.5,
+          "g": 13.8,
+          "l": 4.8
+        }
+      ]
+    },
+    "09/06/2026": {
+      "weight": 100.7,
+      "act": "1.40",
+      "sport": {
+        "name": "Badminton",
+        "kcal": 500
+      },
+      "foods": [
+        {
+          "n": "Stellato saumon #1",
+          "k": 491,
+          "p": 19.7,
+          "g": 39.6,
+          "l": 26.9
+        },
+        {
+          "n": "Stellato saumon #2",
+          "k": 491,
+          "p": 19.7,
+          "g": 39.6,
+          "l": 26.9
+        },
+        {
+          "n": "Yaourt 125g",
+          "k": 120,
+          "p": 4.8,
+          "g": 9.7,
+          "l": 6.6
+        },
+        {
+          "n": "2 Pepito",
+          "k": 124,
+          "p": 5,
+          "g": 10,
+          "l": 6.8
+        },
+        {
+          "n": "5 Pepito",
+          "k": 310,
+          "p": 12.5,
+          "g": 25,
+          "l": 17
+        },
+        {
+          "n": "Ficello 80g",
+          "k": 243,
+          "p": 9.8,
+          "g": 19.6,
+          "l": 13.3
+        },
+        {
+          "n": "1/2 Danonino (50g)",
+          "k": 52,
+          "p": 2.1,
+          "g": 4.2,
+          "l": 2.8
+        },
+        {
+          "n": "Sodebo All’Italiana pesto",
+          "k": 553,
+          "p": 22.2,
+          "g": 44.6,
+          "l": 30.3
+        },
+        {
+          "n": "Poulet pané 100g",
+          "k": 250,
+          "p": 10.1,
+          "g": 20.2,
+          "l": 13.7
+        },
+        {
+          "n": "Sauce Quick’n Toast 20g",
+          "k": 130,
+          "p": 5.2,
+          "g": 10.5,
+          "l": 7.1
+        },
+        {
+          "n": "Cheddar fondu (1 tranche)",
+          "k": 65,
+          "p": 2.6,
+          "g": 5.2,
+          "l": 3.6
+        },
+        {
+          "n": "Pain burger",
+          "k": 155,
+          "p": 6.2,
+          "g": 12.5,
+          "l": 8.5
+        },
+        {
+          "n": "Parmesan 25g",
+          "k": 100,
+          "p": 4,
+          "g": 8.1,
+          "l": 5.5
+        }
+      ]
+    },
+    "10/06/2026": {
+      "weight": 100.4,
+      "act": "1.20",
+      "sport": {
+        "name": "Escrime",
+        "kcal": 1100
+      },
+      "foods": [
+        {
+          "n": "Pain burger",
+          "k": 155,
+          "p": 9.7,
+          "g": 10.9,
+          "l": 7.7
+        },
+        {
+          "n": "Poulet pané 100g",
+          "k": 250,
+          "p": 15.6,
+          "g": 17.7,
+          "l": 12.4
+        },
+        {
+          "n": "Sauce Quick’n Toast 20g",
+          "k": 130,
+          "p": 8.1,
+          "g": 9.2,
+          "l": 6.5
+        },
+        {
+          "n": "Cheddar fondu (1 tranche)",
+          "k": 65,
+          "p": 4.1,
+          "g": 4.6,
+          "l": 3.2
+        },
+        {
+          "n": "2 Pepito",
+          "k": 124,
+          "p": 7.8,
+          "g": 8.8,
+          "l": 6.2
+        },
+        {
+          "n": "Shaker whey + lait amande",
+          "k": 151,
+          "p": 9.4,
+          "g": 10.7,
+          "l": 7.5
+        },
+        {
+          "n": "2 Ficello (40g)",
+          "k": 122,
+          "p": 7.6,
+          "g": 8.6,
+          "l": 6.1
+        },
+        {
+          "n": "Danonino (100g)",
+          "k": 104,
+          "p": 6.5,
+          "g": 7.3,
+          "l": 5.2
+        },
+        {
+          "n": "Steak haché 100g",
+          "k": 200,
+          "p": 12.5,
+          "g": 14.1,
+          "l": 9.9
+        },
+        {
+          "n": "Pasta box poivre",
+          "k": 515,
+          "p": 32.2,
+          "g": 36.4,
+          "l": 25.6
+        },
+        {
+          "n": "Parmesan 20g",
+          "k": 80,
+          "p": 5,
+          "g": 5.7,
+          "l": 4
+        },
+        {
+          "n": "Shaker whey + lait amande",
+          "k": 151,
+          "p": 9.4,
+          "g": 10.7,
+          "l": 7.5
+        },
+        {
+          "n": "1 Ficello (20g)",
+          "k": 61,
+          "p": 3.8,
+          "g": 4.3,
+          "l": 3
+        },
+        {
+          "n": "Danonino (100g)",
+          "k": 104,
+          "p": 6.5,
+          "g": 7.3,
+          "l": 5.2
+        },
+        {
+          "n": "2 Pepito",
+          "k": 124,
+          "p": 7.8,
+          "g": 8.8,
+          "l": 6.2
+        }
+      ]
+    },
+    "11/06/2026": {
+      "weight": 100,
+      "act": "1.20",
+      "sport": {
+        "name": "Badminton",
+        "kcal": 300
+      },
+      "foods": [
+        {
+          "n": "8 tranches de saucisson",
+          "k": 180,
+          "p": 10,
+          "g": 14.5,
+          "l": 8.7
+        },
+        {
+          "n": "1/2 croque-monsieur",
+          "k": 220,
+          "p": 12.3,
+          "g": 17.7,
+          "l": 10.6
+        },
+        {
+          "n": "2 tartines thon œuf",
+          "k": 180,
+          "p": 10,
+          "g": 14.5,
+          "l": 8.7
+        },
+        {
+          "n": "1 saucisse Knacki",
+          "k": 75,
+          "p": 4.2,
+          "g": 6.1,
+          "l": 3.6
+        },
+        {
+          "n": "1/2 croissant",
+          "k": 120,
+          "p": 6.7,
+          "g": 9.7,
+          "l": 5.8
+        },
+        {
+          "n": "2 verres jus multivitamine",
+          "k": 190,
+          "p": 10.6,
+          "g": 15.3,
+          "l": 9.2
+        },
+        {
+          "n": "Ficello ×0.2",
+          "k": 61,
+          "p": 3.4,
+          "g": 4.9,
+          "l": 2.9
+        },
+        {
+          "n": "Ficello ×0.4",
+          "k": 122,
+          "p": 6.8,
+          "g": 9.8,
+          "l": 5.9
+        },
+        {
+          "n": "whey 30g",
+          "k": 116,
+          "p": 6.5,
+          "g": 9.4,
+          "l": 5.6
+        },
+        {
+          "n": "Lait d’amande sans sucre (250ml)",
+          "k": 35,
+          "p": 2,
+          "g": 2.8,
+          "l": 1.7
+        },
+        {
+          "n": "Boite de Thon a l’huile",
+          "k": 95,
+          "p": 5.3,
+          "g": 7.7,
+          "l": 4.6
+        },
+        {
+          "n": "Pastabox sauce au poivre",
+          "k": 515,
+          "p": 28.7,
+          "g": 41.5,
+          "l": 24.8
+        },
+        {
+          "n": "Pepito (1 biscuit)",
+          "k": 62,
+          "p": 3.5,
+          "g": 5,
+          "l": 3
+        }
+      ]
+    },
+    "12/06/2026": {
+      "weight": 100.4,
+      "act": "1.20",
+      "sport": null,
+      "foods": [
+        {
+          "n": "Clafoutis (1 portion)",
+          "k": 131,
+          "p": 4.3,
+          "g": 12.6,
+          "l": 6.7
+        },
+        {
+          "n": "Raviolis au chèvre 250g",
+          "k": 623,
+          "p": 20.5,
+          "g": 59.9,
+          "l": 32
+        },
+        {
+          "n": "Parmesan 10g",
+          "k": 40,
+          "p": 1.3,
+          "g": 3.8,
+          "l": 2.1
+        },
+        {
+          "n": "Beurre 10g",
+          "k": 75,
+          "p": 2.5,
+          "g": 7.2,
+          "l": 3.8
+        },
+        {
+          "n": "2 tranches mozzarella (50g)",
+          "k": 153,
+          "p": 5,
+          "g": 14.7,
+          "l": 7.9
+        },
+        {
+          "n": "2 Kinder Chocofresh",
+          "k": 238,
+          "p": 7.8,
+          "g": 22.9,
+          "l": 12.2
+        },
+        {
+          "n": "3 Pepito",
+          "k": 186,
+          "p": 6.1,
+          "g": 17.9,
+          "l": 9.5
+        },
+        {
+          "n": "1 Salade Torti concombre",
+          "k": 564,
+          "p": 18.5,
+          "g": 54.3,
+          "l": 28.9
+        },
+        {
+          "n": "2 tranches de gouda (~40g)",
+          "k": 142,
+          "p": 4.7,
+          "g": 13.7,
+          "l": 7.3
+        },
+        {
+          "n": "Pain ~30g",
+          "k": 84,
+          "p": 2.8,
+          "g": 8.1,
+          "l": 4.3
+        },
+        {
+          "n": "Pepito (1 biscuit) ×5",
+          "k": 310,
+          "p": 10.2,
+          "g": 29.8,
+          "l": 15.9
+        },
+        {
+          "n": "Danonino (1 pot 100g)",
+          "k": 104,
+          "p": 3.4,
+          "g": 10,
+          "l": 5.3
+        }
+      ]
+    },
+    "13/06/2026": {
+      "weight": 100.6,
+      "act": "1.20",
+      "sport": null,
+      "foods": [
+        {
+          "n": "Sandwich thon mayo œuf (boulangerie)",
+          "k": 750,
+          "p": 36.6,
+          "g": 77.8,
+          "l": 30.9
+        },
+        {
+          "n": "1 Kinder Chocofresh",
+          "k": 119,
+          "p": 5.8,
+          "g": 12.3,
+          "l": 4.9
+        },
+        {
+          "n": "Salade Sodebo Antibes (riz/thon/œuf/olive + gressins + cookie)",
+          "k": 627,
+          "p": 30.6,
+          "g": 65,
+          "l": 25.9
+        },
+        {
+          "n": "Yaourt (pot 125g)",
+          "k": 120,
+          "p": 5.9,
+          "g": 12.4,
+          "l": 5
+        },
+        {
+          "n": "whey 30g",
+          "k": 116,
+          "p": 5.7,
+          "g": 12,
+          "l": 4.8
+        },
+        {
+          "n": "lait amande pour whey",
+          "k": 110,
+          "p": 5.4,
+          "g": 11.4,
+          "l": 4.5
+        }
+      ]
+    }
+  },
+  "theme": "light"
+}
