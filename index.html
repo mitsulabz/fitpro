@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>FitNoob — suivi nutrition &amp; santé</title>
+<title>FitPro — nutrition &amp; programme</title>
 <style>
 :root{
  --bg:#fff5eb;--card:#ffffff;--ink:#2b2740;--muted:#9a93b0;--accent:#a4a4f4;--accent2:#ffa4d4;
@@ -209,7 +209,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 </head>
 <body>
 <header>
-  <div class="brand"><span class="dot"></span> FitNoob <span class="ver" id="brandVer"></span><button id="btnReload" title="Recharger l\'app" onclick="location.reload(true)" style="background:none;border:none;cursor:pointer;font-size:.75rem;padding:0 0 0 4px;opacity:.55;line-height:1">↺</button></div>
+  <div class="brand"><span class="dot"></span> FitPro <span class="ver" id="brandVer"></span><button id="btnReload" title="Recharger l\'app" onclick="location.reload(true)" style="background:none;border:none;cursor:pointer;font-size:.75rem;padding:0 0 0 4px;opacity:.55;line-height:1">↺</button></div>
   <button class="iconbtn" id="btnSettings" title="Réglages">⚙️</button>
   <button class="iconbtn" id="btnTheme" title="Thème">🌙</button>
 </header>
@@ -269,6 +269,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
         <select id="p_goalmode">
           <option value="bf">% de masse grasse cible</option>
           <option value="weight">Poids cible (kg)</option>
+          <option value="prog_date">Date finale du programme</option>
         </select>
       </div>
       <div class="fld" id="goalweight_field" style="display:none">
@@ -313,6 +314,16 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
       <button class="btn ghost" id="savePrivacy" style="margin-top:4px;font-size:.88rem">Enregistrer</button>
     </div>
 
+    <div class="card" id="progCard">
+      <h2 style="margin-top:0">Programme nutritionnel</h2>
+      <p class="muted" style="font-size:.84rem">Importe un fichier JSON de programme (cibles calories/macros par jour). Les cibles du programme remplacent le calcul automatique.</p>
+      <div id="progStatus" style="font-size:.85rem;margin:8px 0"></div>
+      <div class="row" style="gap:8px">
+        <button class="btn ghost" id="importProg">⬆️ Importer un programme</button>
+        <button class="btn ghost" id="clearProg" style="display:none">🗑️ Supprimer</button>
+      </div>
+      <input type="file" id="progFile" accept="application/json" style="display:none">
+    </div>
     <div class="card">
       <h2 style="margin-top:0">Données</h2>
       <p class="muted" style="font-size:.84rem">Tes données sont stockées dans ce navigateur. Exporte-les pour les sauvegarder ou les transférer.</p>
@@ -453,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='V4.7 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -462,7 +473,7 @@ const SUPABASE_URL='https://arydsxswhbgpfayjgtak.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyeWRzeHN3aGJncGZheWpndGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzODU1NzcsImV4cCI6MjA5Njk2MTU3N30.JwhGPqopTzi74jv-1zM5JSOAZ0O78p1Q667pB4ZMcH8';
 
 const DEFAULT={profile:{age:'',sex:'h',height:'',weight:'',bf:'',bft:'',act:'1.30',sportHours:'',goalMode:'bf',goalWeight:'',shareHistory:true},
-  days:{},favorites:[],sports:[],theme:'light'};
+  days:{},favorites:[],sports:[],programme:null,theme:'light'};
 let S=load();
 function load(){try{const r=localStorage.getItem(LS_KEY);if(r){const o=JSON.parse(r);return migrateState(Object.assign(JSON.parse(JSON.stringify(DEFAULT)),o));}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT));}
 /* migration : convertit les anciennes clés d'activité (sed/act/sup) vers les 8 niveaux */
@@ -511,9 +522,52 @@ const OLD_ACT={sed:1.2,act:1.45,sup:1.7}; /* compat anciennes données */
 function actFactor(k){if(k in OLD_ACT)return OLD_ACT[k];const f=parseFloat(k);return isFinite(f)?f:1.2;}
 function actLabel(k){k=migrateAct(k);const l=ACT_LEVELS.find(x=>x.key===k);return l?l.label:'—';}
 function migrateAct(k){const m={sed:'1.20',act:'1.40',sup:'1.60'};return m[k]||k;}
+/* ============================== PROGRAMME ============================== */
+function getProgramDay(ds){
+  if(!S.programme||!S.programme.jours)return null;
+  // convertit "DD/MM/YYYY" → "16 juin", "17 juin", etc. pour matcher le JSON
+  const d=parseDS(ds);
+  const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const label=(d.getDate()+' '+mois[d.getMonth()]).toLowerCase();
+  const fullLabel=(WD[d.getDay()]+' '+d.getDate()+' '+mois[d.getMonth()]).toLowerCase();
+  return S.programme.jours.find(j=>{
+    const jl=(j.jour||'').toLowerCase();
+    return jl===label||jl===fullLabel||jl.endsWith(' '+label);
+  })||null;}
+function programmeEndDate(){
+  if(!S.programme||!S.programme.jours||!S.programme.jours.length)return null;
+  const last=S.programme.jours[S.programme.jours.length-1];
+  const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  // parse "dimanche 1 novembre" → Date
+  const parts=(last.jour||'').toLowerCase().split(' ').filter(Boolean);
+  if(parts.length<2)return null;
+  const day=parseInt(parts[parts.length-2]);const mo=mois.indexOf(parts[parts.length-1]);
+  if(isNaN(day)||mo<0)return null;
+  const yr=new Date().getFullYear()+(mo<new Date().getMonth()?1:0);
+  return new Date(yr,mo,day);}
 function tdeeBase(){const b=bmr();return b?Math.round(b*actFactor(S.profile.act)):0;}
-/* objectif : kg à perdre + kcal totales — supporte 2 modes */
+/* objectif : kg à perdre + kcal totales — supporte 3 modes */
 function goalCalc(){const p=S.profile;const w=num(p.weight);if(!w)return null;
+  if(p.goalMode==='prog_date'){
+    const endDate=programmeEndDate();if(!endDate||!S.programme)return null;
+    const today2=new Date();today2.setHours(0,0,0,0);if(endDate<=today2)return null;
+    const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    let totalDef=0;
+    (S.programme.jours||[]).forEach(j=>{
+      const parts=(j.jour||'').toLowerCase().split(' ').filter(Boolean);
+      const d2=parseInt(parts[parts.length-2]);const mo=mois.indexOf(parts[parts.length-1]);
+      if(isNaN(d2)||mo<0)return;
+      const yr=new Date().getFullYear()+(mo<new Date().getMonth()?1:0);
+      const jd=new Date(yr,mo,d2);jd.setHours(0,0,0,0);
+      if(jd>=today2)totalDef+=(j.deficit||0);
+    });
+    if(totalDef<=0)return null;
+    const fatToLose=totalDef/7700;
+    const bf=num(p.bf),bft=num(p.bft);
+    const lean=bf?w*(1-bf/100):null;
+    const targetW=lean&&bft?lean/(1-bft/100):w-fatToLose;
+    return {targetW,fatToLose,kcal:totalDef,curW:w,endDate,byWeight:!bft};
+  }
   if(p.goalMode==='weight'){
     const gw=num(p.goalWeight);if(!gw||gw>=w)return null;
     const fatToLose=w-gw;const kcal=fatToLose*7700;
@@ -592,7 +646,8 @@ function renderDays(){
     const logged=day.foods.length>0;
     const exp=dayExpend(day);
     const def=logged?(exp-kcal):0;
-    if(logged&&parseDS(ds)<todayD)cum+=def;
+    const progDayC=getProgramDay(ds);const expForCum=progDayC?progDayC.calories_brulees:exp;
+    if(logged&&parseDS(ds)<todayD)cum+=(expForCum-kcal);
     const isToday=ds===today;
     let sumDef;
     if(logged){const sm=def>=900?'🤩':def>=600?'😀':def>=300?'🙂':def>=0?'😐':'😞';
@@ -604,21 +659,25 @@ function renderDays(){
     const sportSel='<div class="field">🏃 Sport <select class="sportsel" data-ds="'+ds+'">'+sportOpts+'</select></div>';
     const weightRow='<div class="field">⚖️ Poids <input class="inp xs wt" data-ds="'+ds+'" value="'+esc(day.weight||'')+'" placeholder="—"> kg</div>';
 
-    /* cible adaptative du jour : -20% de la dépense réelle de CE jour */
-    const tDef=deficitFor(exp);const tIntake=Math.round(exp-tDef);
+    /* cible du jour : programme si disponible, sinon -20% de la dépense */
+    const progDay=getProgramDay(ds);
+    const tIntake=progDay?progDay.calories:Math.round(exp-deficitFor(exp));
+    const tExpend=progDay?progDay.calories_brulees:Math.round(exp);
+    const progType=progDay?progDay.type:'';
     let targetRow;
-    if(logged){const rem=tIntake-kcal;targetRow='<div class="field">🎯 Cible <b>'+tIntake+'</b> kcal (−20 %) · '+(rem>=0?('reste <b style="color:var(--ok)">'+rem+'</b> à manger'):('<b style="color:var(--bad)">dépassé de '+(-rem)+'</b>'))+'</div>';}
-    else targetRow='<div class="field">🎯 Cible du jour : viser ~<b>'+tIntake+'</b> kcal <span class="muted">(−20 % de '+Math.round(exp)+')</span></div>';
+    if(logged){const rem=tIntake-kcal;targetRow='<div class="field">🎯 Cible <b>'+tIntake+'</b> kcal'+(progDay?' <span class="muted">('+esc(progType)+')</span>':' (−20 %)')+' · '+(rem>=0?('reste <b style="color:var(--ok)">'+rem+'</b> à manger'):('<b style="color:var(--bad)">dépassé de '+(-rem)+'</b>'))+'</div>';}
+    else targetRow='<div class="field">🎯 Cible du jour : <b>'+tIntake+'</b> kcal'+(progDay?' <span class="muted" style="font-size:.82rem">'+esc(progType)+'</span>':' <span class="muted">(−20 %)</span>')+'</div>';
+    const realDef=logged?(tExpend-kcal):0;
     let energy;
-    if(logged){const dc=def>=0?'pos':'neg';energy='<div class="energy"><span>Ingéré <b>'+kcal+'</b></span><span>Dépensé <b>'+Math.round(exp)+'</b></span><span>Déficit <b class="'+dc+'">'+(def>=0?'+':'')+Math.round(def)+'</b></span><span class="cum">cumul '+(cum>=0?'+':'')+Math.round(cum)+'</span></div>';}
-    else energy='<div class="energy"><span class="muted">Repas à compléter</span><span class="cum">Dépense est. '+Math.round(exp)+'</span></div>';
+    if(logged){const dc=realDef>=0?'pos':'neg';energy='<div class="energy"><span>Ingéré <b>'+kcal+'</b></span><span>Dépense'+(progDay?' prévu':' est.')+' <b>'+Math.round(tExpend)+'</b></span><span>Déficit <b class="'+dc+'">'+(realDef>=0?'+':'')+Math.round(realDef)+'</b></span><span class="cum">cumul '+(cum>=0?'+':'')+Math.round(cum)+'</span></div>';}
+    else energy='<div class="energy"><span class="muted">Repas à compléter</span><span class="cum">Dépense '+(progDay?'prévue':' est.')+' '+Math.round(tExpend)+'</span></div>';
     let li='';day.foods.forEach((f,fi)=>{li+='<li><span>'+esc(f.n)+'</span><span class="r">'+Math.round(f.k)+' kcal <button class="rmf" data-ds="'+ds+'" data-fi="'+fi+'">✕</button></span></li>';});
     const foods='<details class="foods"'+(day.foods.length?' open':'')+'><summary>Aliments ('+day.foods.length+')</summary><ul>'+li+'</ul><button class="addfoodbtn" data-ds="'+ds+'">＋ Ajouter un aliment</button></details>';
-    const tm=logged?targetMacros(tIntake,num(S.profile.weight)):null;
+    const tm=progDay?{tp:progDay.proteines_g,tg:progDay.glucides_g,tl:progDay.lipides_g,tfi:Math.round(tIntake/1000*14),tsel:5}:(logged?targetMacros(tIntake,num(S.profile.weight)):null);
     const macro=logged?macroBar(P,G,L,tm,FI,SEL):'';
     const op=isToday?' open':'';
     cards.push('<details class="day'+(isToday?' today':'')+'" data-ds="'+ds+'"'+op+'>'+
-      '<summary><span class="sum-date">'+frDate(ds)+(isToday?' • aujourd\'hui':'')+'</span>'+
+      '<summary><span class="sum-date">'+frDate(ds)+(isToday?' • aujourd\'hui':'')+(progType?' <span class="muted" style="font-size:.75rem"> · '+esc(progType)+'</span>':'')+'</span>'+
       '<span class="sum-meta">'+(sportTxt?esc(sportTxt)+'<br>':'')+sumDef+'</span></summary>'+
       sportSel+
       weightRow+targetRow+
@@ -745,6 +804,20 @@ $('#importData').onclick=()=>$('#importFile').click();
 $('#importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);S=Object.assign(JSON.parse(JSON.stringify(DEFAULT)),o);save();fillProfile();renderSports();renderFav();renderDays();applyTheme();toast('Données importées ✓');}catch(err){alert('Fichier invalide.');}};r.readAsText(f);};
 $('#resetData').onclick=()=>{if(confirm('Tout effacer ? (profil, jours, favoris)')){localStorage.removeItem(LS_KEY);S=JSON.parse(JSON.stringify(DEFAULT));save();fillProfile();renderSports();renderFav();renderDays();applyTheme();toast('Effacé');}};
 
+/* ============================== PROGRAMME IMPORT ============================== */
+function renderProgStatus(){
+  const box=$('#progStatus');const clr=$('#clearProg');
+  if(!box)return;
+  if(S.programme){
+    const n=(S.programme.jours||[]).length;
+    const titre=S.programme.programme||'Programme importé';
+    box.innerHTML='<span style="color:var(--ok)">✓</span> <b>'+esc(titre)+'</b> — '+n+' jours';
+    if(clr)clr.style.display='';
+  }else{box.innerHTML='<span class="muted">Aucun programme chargé.</span>';if(clr)clr.style.display='none';}}
+$('#importProg').onclick=()=>$('#progFile').click();
+$('#progFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.jours||!Array.isArray(o.jours))throw new Error();S.programme=o;save();renderProgStatus();renderDays();toast('Programme importé ✓');}catch(err){alert('Fichier de programme invalide.');}};r.readAsText(f);};
+$('#clearProg').onclick=()=>{if(confirm('Supprimer le programme ?')){S.programme=null;save();renderProgStatus();renderDays();toast('Programme supprimé');}};
+
 /* ============================== FAVORIS (onglet Aliments) ============================== */
 function renderFav(){const box=$('#favList');
   if(!S.favorites.length){box.innerHTML='<div class="empty">Aucun favori.<br>Ajoute des aliments via la recherche Open Food Facts, le scan, ou en manuel.</div>';return;}
@@ -869,7 +942,7 @@ let sb=null, authUser=null, _reconciling=false, _syncTimer=null;
 function syncConfigured(){return !!(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase);}
 function setSyncStatus(t){const el=$('#syncStatus');if(el)el.textContent=t||'';}
 function nowHM(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
-function refreshAll(){applyTheme();fillProfile();renderSports();renderFav();renderDays();}
+function refreshAll(){applyTheme();fillProfile();renderSports();renderFav();renderDays();renderProgStatus();}
 /* déclenche un envoi cloud différé (1,5 s) après une modif locale, si connecté */
 function scheduleCloudSync(){if(!sb||!authUser)return;clearTimeout(_syncTimer);_syncTimer=setTimeout(pushRemote,1500);}
 
@@ -1232,13 +1305,13 @@ function addAIFood(f){
 $('#ai_run').onclick=runFoodAI;
 
 /* ============================== INIT ============================== */
-$('#buildStamp').textContent='FitNoob '+BUILD;
+$('#buildStamp').textContent='FitPro '+BUILD;
 $('#brandVer').textContent=BUILD.split('·')[0].trim();
 /* écran de connexion : bouton principal + Entrée + bascule */
 $('#gatePrimary').onclick=gateAuth;
 $('#gatePw').addEventListener('keydown',e=>{if(e.key==='Enter')gateAuth();});
 bindGateSwitch();
-applyTheme();fillProfile();renderSports();renderFav();renderDays();updManualLabel();
+applyTheme();fillProfile();renderSports();renderFav();renderDays();updManualLabel();renderProgStatus();
 initSync();
 </script>
 </body>
