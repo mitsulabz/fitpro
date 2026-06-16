@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.7 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.8 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -1267,7 +1267,7 @@ async function runCoach(){
   if(!goalCalc()){inner.innerHTML='<div class="coach-text">Renseigne d\'abord ton profil et ton objectif dans les Réglages.</div>';return;}
   btn.disabled=true;inner.innerHTML='<div class="coach-text"><span class="spin"></span> Analyse de ton suivi en cours…</div>';
   try{
-    const {data,error}=await sb.functions.invoke('coach',{body:{summary:buildCoachSummary()}});
+    const {data,error}=await sb.functions.invoke('coach-pro',{body:{summary:buildCoachSummary()}});
     if(error){inner.innerHTML='<div class="coach-text">'+closeBtn+'Coach indisponible : '+esc(error.message||(''+error))+'</div>';}
     else if(data&&data.error){inner.innerHTML='<div class="coach-text">'+closeBtn+'Erreur : '+esc(data.error)+'</div>';}
     else{const t=esc(data&&data.text?data.text:'Réponse vide.').replace(/\n/g,'<br>');
