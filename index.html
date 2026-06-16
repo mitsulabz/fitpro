@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.1 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.2 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -681,10 +681,12 @@ function renderProgPage(){
   if(jbox){
     const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
     const actOpts=['<option value="">— Repos (BMR×base) —</option>'].concat(Object.entries(acts).map(([name,kcal])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>')).join('');
-    const header='<div style="display:flex;align-items:center;gap:6px;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600">'+
-      '<span style="flex:1">Jour</span><span style="flex:1">Activité</span>'+
-      '<span style="text-align:right;min-width:130px"><span style="color:var(--ok)">Je mange</span> · <span style="color:var(--bad)">Je brule</span></span>'+
-      '<span style="text-align:right;min-width:110px">Cum. · Gras</span></div>';
+    const header='<div style="display:grid;grid-template-columns:1fr 1fr min-content min-content min-content;gap:6px;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600;align-items:center">'+
+      '<span>Jour</span><span>Activité</span>'+
+      '<span style="text-align:right;min-width:60px;white-space:nowrap"><span style="color:var(--ok)">Je mange</span></span>'+
+      '<span style="text-align:right;min-width:60px;white-space:nowrap"><span style="color:var(--bad)">Je brule</span></span>'+
+      '<span style="text-align:right;min-width:90px">Déficit cumulé</span>'+
+      '<span style="text-align:right;min-width:80px">Gras brulé</span></div>';
     let cumDef=0;
     jbox.innerHTML=header+(S.programme.jours||[]).map(j=>{
       const ds=jourToDS(j.jour)||'';
@@ -698,11 +700,13 @@ function renderProgPage(){
       const fatG=cumDef/7.7;
       const fatStr=Math.abs(fatG)>=1000?(fatG/1000).toFixed(2)+' kg':(Math.round(fatG))+' g';
       const cumCol=cumDef>=0?'var(--ok)':'var(--bad)';
-      return '<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.85rem" data-ds="'+esc(ds)+'">'+
-        '<span style="flex:1"><b>'+esc(j.jour)+'</b></span>'+
-        '<select class="prog-jour-actsel" data-ds="'+esc(ds)+'" data-deftype="'+esc(j.type)+'" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink);font-size:.8rem">'+opts+'</select>'+
-        '<span class="prog-jour-kcal" data-ds="'+esc(ds)+'" style="text-align:right;min-width:130px"><b style="color:var(--ok)">'+j.calories+'</b> · <b style="color:var(--bad)">'+depense+'</b> kcal</span>'+
-        '<span style="text-align:right;min-width:110px;font-size:.8rem"><b style="color:'+cumCol+'">'+Math.round(cumDef)+'</b> kcal<br><span class="muted">'+fatStr+'</span></span></div>';
+      return '<div style="display:grid;grid-template-columns:1fr 1fr min-content min-content min-content min-content;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.82rem;align-items:center" data-ds="'+esc(ds)+'">'+
+        '<span><b>'+esc(j.jour)+'</b></span>'+
+        '<select class="prog-jour-actsel" data-ds="'+esc(ds)+'" data-deftype="'+esc(j.type)+'" style="border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink);font-size:.78rem;width:100%">'+opts+'</select>'+
+        '<span style="text-align:right;min-width:60px;white-space:nowrap"><b style="color:var(--ok)">'+j.calories+'</b> kcal</span>'+
+        '<span style="text-align:right;min-width:60px;white-space:nowrap"><b style="color:var(--bad)">'+depense+'</b> kcal</span>'+
+        '<span style="text-align:right;min-width:90px;white-space:nowrap"><b style="color:'+cumCol+'">'+Math.round(cumDef)+'</b> kcal</span>'+
+        '<span style="text-align:right;min-width:80px;white-space:nowrap;color:var(--muted)">'+fatStr+'</span></div>';
     }).join('');
     /* binding des sélecteurs de la liste jours */
     $$('.prog-jour-actsel').forEach(sel=>{sel.onchange=()=>{
