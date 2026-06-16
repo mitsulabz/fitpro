@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V3.6 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.7 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -1207,49 +1207,56 @@ async function gateAuth(){
 
 /* ============================== COACH IA ============================== */
 function buildCoachSummary(){
-  const range=buildDayRange();const today=new Date();today.setHours(0,0,0,0);
-  const logged=range.filter(ds=>S.days[ds]&&S.days[ds].foods.length);
-  /* on exclut la journée en cours (non terminée) de tous les calculs envoyés au coach */
-  const loggedPast=logged.filter(ds=>parseDS(ds)<today);
-  let cum=0;loggedPast.forEach(ds=>{const d=S.days[ds];cum+=dayExpend(d)-Math.round(dayKcal(d));});
-  const g=goalCalc();const rec=recDeficit();
-  let avg=0;if(loggedPast.length){const d0=parseDS(loggedPast.slice().sort(cmpDS)[0]);const el=Math.max(1,Math.round((today-d0)/86400000)+1);avg=Math.round(cum/el);}
-  const recent=loggedPast.slice(-14).map(ds=>{const d=S.days[ds];const exp=dayExpend(d);const k=Math.round(dayKcal(d));
-    return {date:ds,ingere:k,depense:exp,deficit:exp-k,proteines:Math.round(dayMacro(d,'p')),poids:d.weight||null,sport:d.sport?d.sport.name:null};});
-  /* données programme pour le coach */
-  let progData=null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const g=goalCalc();
+  /* Projection masse grasse finale via déficit total du programme */
+  let mgFinale=null;
   if(S.programme&&S.programme.jours){
-    const today2=new Date();today2.setHours(0,0,0,0);
-    let surplusVsProg=0,daysWithProg=0,deficitCible=0;
-    S.programme.jours.forEach(j=>{
-      const ds=jourToDS(j.jour);if(!ds)return;
-      const d2=parseDS(ds);
-      deficitCible+=(j.calories_brulees||0)-(j.calories||0);
-      if(d2<today2&&S.days[ds]&&S.days[ds].foods&&S.days[ds].foods.length){
-        surplusVsProg+=Math.round(dayKcal(S.days[ds]))-(j.calories||0);
-        daysWithProg++;
-      }
-    });
-    const lastJ=S.programme.jours[S.programme.jours.length-1];
-    const dateFin=lastJ?jourToDS(lastJ.jour):null;
-    progData={
-      date_fin:dateFin,
-      deficit_cible_kcal:Math.round(deficitCible),
-      retard_kcal:surplusVsProg,
-      heures_velo_a_rattraper:surplusVsProg>0?+(surplusVsProg/500).toFixed(1):0,
-      jours_avec_programme_logges:daysWithProg
-    };
+    const w=num(S.profile.weight),bf=num(S.profile.bf);
+    if(w&&bf){
+      const totalDef=S.programme.jours.reduce((s,j)=>s+(j.deficit||0),0);
+      const kgGrasPerdus=totalDef/7700;
+      const masseGrasseInit=w*bf/100;
+      const masseGrasseFinale=Math.max(0,masseGrasseInit-kgGrasPerdus);
+      const poidsFinale=w-kgGrasPerdus;
+      mgFinale=+(masseGrasseFinale/poidsFinale*100).toFixed(1);
+    }
   }
+  /* Jours du programme déjà loggés avec au moins 1 aliment */
+  const jours=S.programme&&S.programme.jours||[];
+  const lastJ=jours[jours.length-1];
+  const dateFin=lastJ?jourToDS(lastJ.jour):null;
+  let retardKcal=0,jLogged=0;
+  let sumProt=0,sumGluc=0,sumLip=0;
+  let cibleProt=0,cibleGluc=0,cibleLip=0;
+  jours.forEach(j=>{
+    const ds=jourToDS(j.jour);if(!ds)return;
+    const d2=parseDS(ds);if(!d2||d2>=today)return;
+    const day=S.days[ds];if(!day||!day.foods||!day.foods.length)return;
+    if(isLibre(j.type||''))return; /* jours libres exclus */
+    jLogged++;
+    const eaten=Math.round(dayKcal(day));
+    retardKcal+=eaten-(j.calories||0);
+    sumProt+=dayMacro(day,'p');sumGluc+=dayMacro(day,'g');sumLip+=dayMacro(day,'l');
+    cibleProt+=(j.proteines_g||0);cibleGluc+=(j.glucides_g||0);cibleLip+=(j.lipides_g||0);
+  });
+  /* 14 derniers jours loggés (programme ou non) pour la dépense estimée */
+  const range=buildDayRange();
+  const loggedPast=range.filter(ds=>{const d2=parseDS(ds);return d2&&d2<today&&S.days[ds]&&S.days[ds].foods&&S.days[ds].foods.length;});
+  let cum=0;loggedPast.forEach(ds=>{const d=S.days[ds];const pd=getProgramDay(ds);const exp=pd?pd.calories_brulees:dayExpend(d);cum+=exp-Math.round(dayKcal(d));});
   return {
-    profil:{sexe:S.profile.sex,age:num(S.profile.age),taille_cm:num(S.profile.height),poids_kg:num(S.profile.weight),
-            masse_grasse_pct:num(S.profile.bf),masse_grasse_cible_pct:num(S.profile.bft),
-            activite:actLabel(S.profile.act),sport_h_par_semaine:num(S.profile.sportHours)},
-    programme:progData,
-    progression:{deficit_cumule:Math.round(cum),kg_gras_perdus:+(cum/7700).toFixed(2),
-                 pct_objectif:progData?+(cum/progData.deficit_cible_kcal*100).toFixed(1):null,jours_logges:loggedPast.length},
-    deficit_moyen_par_jour:avg,
-    depense_estimee_par_jour:estimatedTDEE(),
-    jours_recents:recent
+    profil:{sexe:S.profile.sex,age:num(S.profile.age),poids_kg:num(S.profile.weight),masse_grasse_pct:num(S.profile.bf)},
+    programme:{
+      date_fin:dateFin,
+      masse_grasse_finale_projetee_pct:mgFinale,
+      jours_logges:jLogged,
+      retard_kcal:Math.round(retardKcal),
+      heures_velo_a_rattraper:retardKcal>0?+(retardKcal/500).toFixed(1):0,
+      macros_reelles:{proteines_g:Math.round(sumProt),glucides_g:Math.round(sumGluc),lipides_g:Math.round(sumLip)},
+      macros_cibles:{proteines_g:Math.round(cibleProt),glucides_g:Math.round(cibleGluc),lipides_g:Math.round(cibleLip)}
+    },
+    progression:{deficit_cumule:Math.round(cum),deficit_cible_total:g?Math.round(g.kcal):null,pct_objectif:g?+(cum/g.kcal*100).toFixed(1):null},
+    depense_estimee_par_jour:estimatedTDEE()
   };
 }
 function coachClose(){$('#coachOutInner').innerHTML='';}
