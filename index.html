@@ -278,19 +278,6 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
       </div>
 
       <button class="btn block" id="saveProfile" style="margin-top:6px">Enregistrer le profil</button>
-      <div class="kpi" id="kpi" style="margin-top:14px"></div>
-      <p class="muted" style="font-size:.76rem;margin-top:10px" id="bmrNote"></p>
-    </div>
-
-    <div class="card">
-      <h2 style="margin-top:0">Activités sportives (presets)</h2>
-      <p class="muted" style="font-size:.84rem">Crée tes sports avec leurs calories ; tu les choisis ensuite dans chaque jour.</p>
-      <div id="sportList"></div>
-      <div class="qtybar" style="margin-top:10px">
-        <div class="fld" style="flex:2"><label>Nom</label><input id="sp_name" placeholder="ex : Badminton"></div>
-        <div class="fld" style="flex:1"><label>kcal</label><input id="sp_kcal" type="number" placeholder="500"></div>
-        <button class="btn" id="sp_add" style="margin-bottom:0">＋</button>
-      </div>
     </div>
 
     <div class="card">
@@ -477,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.6 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.7 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -883,34 +870,19 @@ function fillProfile(){const p=S.profile;
   $('#p_weight').value=p.weight;$('#p_bf').value=p.bf;$('#p_bft').value=p.bft;
   $('#p_goalmode').value=p.goalMode||'bf';$('#p_goalweight').value=p.goalWeight||'';
   $('#p_sharehistory').checked=!!p.shareHistory;
-  updateGoalModeUI();renderKPI();}
+  updateGoalModeUI();}
 $('#p_goalmode').onchange=updateGoalModeUI;
-function renderKPI(){const b=bmr();const tdee=estimatedTDEE();const g=goalCalc();const rec=recDeficit();const sp=dailySportEstimate();
-  let h='<div class="k"><div class="v">'+(b||'—')+'</div><div class="l">Métabolisme de base</div></div>'+
-    '<div class="k"><div class="v">'+(tdee||'—')+'</div><div class="l">Dépense estimée / jour'+(sp?' (dont ~'+sp+' de sport)':'')+'</div></div>';
-  if(g)h+='<div class="k"><div class="v">'+g.targetW.toFixed(1)+'</div><div class="l">Poids cible (kg)</div></div>';
-  if(rec)h+='<div class="k"><div class="v">'+rec.def+'</div><div class="l">Déficit optimal / jour (−20 %)</div></div>'+
-    '<div class="k"><div class="v">'+rec.intake+'</div><div class="l">Apport conseillé / jour (≈)</div></div>';
-  $('#kpi').innerHTML=h;
-  $('#bmrNote').textContent=(S.profile.bf?'Métabolisme via Katch-McArdle (masse maigre). ':'Métabolisme via Mifflin-St-Jeor (renseigne ton % de masse grasse pour plus de précision). ')+'La dépense estimée sert à la projection ; le suivi quotidien utilise ta dépense réelle.';}
-$('#saveProfile').onclick=()=>{const p=S.profile;p.age=$('#p_age').value;p.sex=$('#p_sex').value;p.height=$('#p_height').value;
-  p.weight=$('#p_weight').value;p.bf=$('#p_bf').value;p.bft=$('#p_bft').value;
-  p.goalMode=$('#p_goalmode').value;p.goalWeight=$('#p_goalweight').value;
-  save();renderKPI();renderDays();toast('Profil enregistré ✓');};
-$('#savePrivacy').onclick=()=>{const p=S.profile;p.shareHistory=$('#p_sharehistory').checked;save();toast('Préférences enregistrées ✓');};
-
-/* sports presets */
-function renderSports(){const box=$('#sportList');if(!S.sports.length){box.innerHTML='<p class="muted" style="font-size:.84rem">Aucun preset pour l’instant.</p>';return;}
-  box.innerHTML=S.sports.map((s,i)=>'<div class="fav"><div class="info"><div class="nm">'+esc(s.name)+'</div><div class="mac">'+s.kcal+' kcal</div></div><button class="iconbtn sp_del" data-i="'+i+'">🗑️</button></div>').join('');
-  $$('.sp_del').forEach(b=>b.onclick=()=>{S.sports.splice(+b.dataset.i,1);save();renderSports();renderDays();});}
-$('#sp_add').onclick=()=>{const n=$('#sp_name').value.trim(),k=num($('#sp_kcal').value);if(!n){toast('Nom requis');return;}
-  S.sports.push({name:n,kcal:k});save();$('#sp_name').value='';$('#sp_kcal').value='';renderSports();renderDays();};
+$(‘#saveProfile’).onclick=()=>{const p=S.profile;p.age=$(‘#p_age’).value;p.sex=$(‘#p_sex’).value;p.height=$(‘#p_height’).value;
+  p.weight=$(‘#p_weight’).value;p.bf=$(‘#p_bf’).value;p.bft=$(‘#p_bft’).value;
+  p.goalMode=$(‘#p_goalmode’).value;p.goalWeight=$(‘#p_goalweight’).value;
+  save();renderDays();toast(‘Profil enregistré ✓’);};
+$(‘#savePrivacy’).onclick=()=>{const p=S.profile;p.shareHistory=$(‘#p_sharehistory’).checked;save();toast(‘Préférences enregistrées ✓’);};
 
 /* données export/import/reset */
 $('#exportData').onclick=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fitnoob-data-'+dstr(new Date()).replace(/\//g,'-')+'.json';a.click();};
 $('#importData').onclick=()=>$('#importFile').click();
-$('#importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);S=Object.assign(JSON.parse(JSON.stringify(DEFAULT)),o);save();fillProfile();renderSports();renderFav();renderDays();applyTheme();toast('Données importées ✓');}catch(err){alert('Fichier invalide.');}};r.readAsText(f);};
-$('#resetData').onclick=()=>{if(confirm('Tout effacer ? (profil, jours, favoris)')){localStorage.removeItem(LS_KEY);S=JSON.parse(JSON.stringify(DEFAULT));save();fillProfile();renderSports();renderFav();renderDays();applyTheme();toast('Effacé');}};
+$('#importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);S=Object.assign(JSON.parse(JSON.stringify(DEFAULT)),o);save();fillProfile();renderFav();renderDays();applyTheme();toast('Données importées ✓');}catch(err){alert('Fichier invalide.');}};r.readAsText(f);};
+$('#resetData').onclick=()=>{if(confirm('Tout effacer ? (profil, jours, favoris)')){localStorage.removeItem(LS_KEY);S=JSON.parse(JSON.stringify(DEFAULT));save();fillProfile();renderFav();renderDays();applyTheme();toast('Effacé');}};
 
 /* ============================== PROGRAMME IMPORT ============================== */
 function renderProgStatus(){
@@ -1059,7 +1031,7 @@ let sb=null, authUser=null, _reconciling=false, _syncTimer=null;
 function syncConfigured(){return !!(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase);}
 function setSyncStatus(t){const el=$('#syncStatus');if(el)el.textContent=t||'';}
 function nowHM(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
-function refreshAll(){applyTheme();fillProfile();renderSports();renderFav();renderDays();renderProgStatus();}
+function refreshAll(){applyTheme();fillProfile();renderFav();renderDays();renderProgStatus();}
 /* déclenche un envoi cloud différé (1,5 s) après une modif locale, si connecté */
 function scheduleCloudSync(){if(!sb||!authUser)return;clearTimeout(_syncTimer);_syncTimer=setTimeout(pushRemote,1500);}
 
@@ -1428,7 +1400,7 @@ $('#brandVer').textContent=BUILD.split('·')[0].trim();
 $('#gatePrimary').onclick=gateAuth;
 $('#gatePw').addEventListener('keydown',e=>{if(e.key==='Enter')gateAuth();});
 bindGateSwitch();
-applyTheme();fillProfile();renderSports();renderFav();renderDays();updManualLabel();renderProgStatus();
+applyTheme();fillProfile();renderFav();renderDays();updManualLabel();renderProgStatus();
 initSync();
 </script>
 </body>
