@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.9 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V3.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -976,6 +976,9 @@ $('#saveProgAct').onclick=()=>{
 $('#saveProgActivites').onclick=()=>{
   const map={};
   $$('.act-kcal-inp').forEach(inp=>{const n=inp.dataset.act;if(n)map[n]=num(inp.value);});
+  /* Ré-injecter les types Libre/Repos depuis le JSON (non affichés mais nécessaires dans les sélecteurs) */
+  const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
+  (S.programme&&S.programme.jours||[]).forEach(j=>{const t=(j.type||'').trim();if(t&&(isLibre(t)||isRepos(t))&&!(t in map))map[t]=Math.max(0,(j.calories_brulees||0)-base);});
   saveProgramActivites(map);toast('Calories activités enregistrées ✓');renderProgPage();};
 
 /* ============================== FAVORIS (onglet Aliments) ============================== */
