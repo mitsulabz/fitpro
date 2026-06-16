@@ -477,7 +477,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.4 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V1.5 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -673,7 +673,7 @@ function renderProgPage(){
     const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
     const header='<div style="display:flex;justify-content:space-between;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600">'+
       '<span>Jour · activité</span>'+
-      '<span style="text-align:right;min-width:140px"><span style="color:var(--ok)">À manger</span> · <span style="color:var(--bad)">Dépensé</span></span></div>';
+      '<span style="text-align:right;min-width:140px"><span style="color:var(--ok)">Je mange</span> · <span style="color:var(--bad)">Je brûle</span></span></div>';
     jbox.innerHTML=header+(S.programme.jours||[]).map(j=>{
       const sportKcal=acts[j.type]!=null?acts[j.type]:Math.max(0,(j.calories_brulees||0)-base);
       const depense=base+sportKcal;
