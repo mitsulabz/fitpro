@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.2 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.3 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -681,32 +681,32 @@ function renderProgPage(){
   if(jbox){
     const base=Math.round((bmr()||0)*actFactor(S.profile.act||'1.30'));
     const actOpts=['<option value="">— Repos (BMR×base) —</option>'].concat(Object.entries(acts).map(([name,kcal])=>'<option value="'+esc(name)+'">'+esc(name)+'</option>')).join('');
-    const header='<div style="display:grid;grid-template-columns:1fr 1fr min-content min-content min-content;gap:6px;padding:4px 0 8px;border-bottom:2px solid var(--line);font-size:.78rem;color:var(--muted);font-weight:600;align-items:center">'+
-      '<span>Jour</span><span>Activité</span>'+
-      '<span style="text-align:right;min-width:60px;white-space:nowrap"><span style="color:var(--ok)">Je mange</span></span>'+
-      '<span style="text-align:right;min-width:60px;white-space:nowrap"><span style="color:var(--bad)">Je brule</span></span>'+
-      '<span style="text-align:right;min-width:90px">Déficit cumulé</span>'+
-      '<span style="text-align:right;min-width:80px">Gras brulé</span></div>';
     let cumDef=0;
-    jbox.innerHTML=header+(S.programme.jours||[]).map(j=>{
+    jbox.innerHTML=(S.programme.jours||[]).map(j=>{
       const ds=jourToDS(j.jour)||'';
       const dayOverride=ds&&S.days[ds]?S.days[ds].progActivity:undefined;
       const curName=dayOverride===false?'':(dayOverride?dayOverride.name:j.type);
       const sportKcal=curName&&acts[curName]!=null?acts[curName]:Math.max(0,(j.calories_brulees||0)-base);
       const depense=curName?base+sportKcal:base;
       const opts=actOpts.replace('value="'+esc(curName)+'"','value="'+esc(curName)+'" selected');
-      const dayDef=depense-(j.calories||0);
+      const cal=j.calories||0;
+      const dayDef=depense-cal;
       cumDef+=dayDef;
       const fatG=cumDef/7.7;
-      const fatStr=Math.abs(fatG)>=1000?(fatG/1000).toFixed(2)+' kg':(Math.round(fatG))+' g';
+      const fatStr=Math.abs(fatG)>=1000?(fatG/1000).toFixed(2)+' kg':Math.round(fatG)+' g';
       const cumCol=cumDef>=0?'var(--ok)':'var(--bad)';
-      return '<div style="display:grid;grid-template-columns:1fr 1fr min-content min-content min-content min-content;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.82rem;align-items:center" data-ds="'+esc(ds)+'">'+
-        '<span><b>'+esc(j.jour)+'</b></span>'+
-        '<select class="prog-jour-actsel" data-ds="'+esc(ds)+'" data-deftype="'+esc(j.type)+'" style="border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink);font-size:.78rem;width:100%">'+opts+'</select>'+
-        '<span style="text-align:right;min-width:60px;white-space:nowrap"><b style="color:var(--ok)">'+j.calories+'</b> kcal</span>'+
-        '<span style="text-align:right;min-width:60px;white-space:nowrap"><b style="color:var(--bad)">'+depense+'</b> kcal</span>'+
-        '<span style="text-align:right;min-width:90px;white-space:nowrap"><b style="color:'+cumCol+'">'+Math.round(cumDef)+'</b> kcal</span>'+
-        '<span style="text-align:right;min-width:80px;white-space:nowrap;color:var(--muted)">'+fatStr+'</span></div>';
+      return '<div style="padding:8px 0;border-bottom:1px solid var(--line);" data-ds="'+esc(ds)+'">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'+
+          '<b style="flex:1;font-size:.88rem">'+esc(j.jour)+'</b>'+
+          '<select class="prog-jour-actsel" data-ds="'+esc(ds)+'" data-deftype="'+esc(j.type)+'" style="flex:1;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink);font-size:.78rem">'+opts+'</select>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;font-size:.78rem;text-align:center">'+
+          '<div><div class="muted" style="font-size:.68rem">Je mange</div><b style="color:var(--ok)">'+cal+'</b> kcal</div>'+
+          '<div><div class="muted" style="font-size:.68rem">Je brule</div><b style="color:var(--bad)">'+depense+'</b> kcal</div>'+
+          '<div><div class="muted" style="font-size:.68rem">Déficit cumulé</div><b style="color:'+cumCol+'">'+Math.round(cumDef)+'</b> kcal</div>'+
+          '<div><div class="muted" style="font-size:.68rem">Gras brulé</div><b>'+fatStr+'</b></div>'+
+        '</div>'+
+      '</div>';
     }).join('');
     /* binding des sélecteurs de la liste jours */
     $$('.prog-jour-actsel').forEach(sel=>{sel.onchange=()=>{
