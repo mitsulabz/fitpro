@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.4 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.5 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -628,7 +628,8 @@ function recDeficit(){const w=num(S.profile.weight);const tdee=estimatedTDEE();c
 
 
 /* ============================== ACTIVITÉS PROGRAMME ============================== */
-function isLibre(name){return /libre|repos/i.test(name||'');}
+function isLibre(name){return /libre/i.test(name||'');}
+function isRepos(name){return /repos/i.test(name||'');}
 function getProgramActivites(){
   /* Extrait les activités uniques du programme avec leurs calories SPORT SEULEMENT
      (= calories_brulees - BMR×actBase). Priorité : customisé > dérivé du JSON.
@@ -672,7 +673,7 @@ function renderProgPage(){
   const acts=getProgramActivites();
   const box=$('#progActivitesList');
   if(box){
-    box.innerHTML=Object.entries(acts).filter(([name])=>!isLibre(name)).map(([name,kcal])=>
+    box.innerHTML=Object.entries(acts).filter(([name])=>!isLibre(name)&&!isRepos(name)).map(([name,kcal])=>
       '<div class="qtybar" style="margin-bottom:8px"><div class="fld" style="flex:2;margin-bottom:0"><span style="font-size:.9rem">'+esc(name)+'</span></div>'+
       '<div class="fld" style="flex:1;margin-bottom:0"><input class="act-kcal-inp" data-act="'+esc(name)+'" type="number" value="'+Math.round(kcal)+'" min="0" step="10" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--ink)"></div>'+
       '<span class="muted" style="align-self:center;font-size:.82rem">kcal</span></div>'
@@ -692,6 +693,7 @@ function renderProgPage(){
       const opts=actOpts.replace('value="'+esc(curName)+'"','value="'+esc(curName)+'" selected');
       const cal=j.calories||0;
       const libre=isLibre(curName)||isLibre(j.type);
+      const repos=!libre&&(isRepos(curName)||isRepos(j.type));
       const dayDef=libre?0:depense-cal;
       cumDef+=dayDef;
       const fatG=cumDef/7.7;
