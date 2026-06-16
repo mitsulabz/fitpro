@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V1.9b · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -545,6 +545,20 @@ function programmeEndDate(){
   if(isNaN(day)||mo<0)return null;
   const yr=new Date().getFullYear()+(mo<new Date().getMonth()?1:0);
   return new Date(yr,mo,day);}
+function projDateFromProgramme(remaining){
+  /* Itère les jours futurs du programme et accumule leurs déficits jusqu'à couvrir 'remaining' kcal. */
+  if(!S.programme||!S.programme.jours)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  let acc=0;
+  for(const j of S.programme.jours){
+    const ds=jourToDS(j.jour);if(!ds)continue;
+    const d=parseDS(ds);if(!d||d<today)continue;
+    const def=(j.calories_brulees||0)-(j.calories||0);
+    acc+=def;
+    if(acc>=remaining)return d;
+  }
+  return null; /* programme trop court pour couvrir le déficit restant */
+}
 function jourToDS(jourStr){
   /* Convertit "mardi 16 juin" ou "16 juin" → "16/06/2026" */
   const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -820,21 +834,20 @@ function renderGoal(cum,range){
     p1='📊 Sur '+daysWithProg+' jours loggés : tu as mangé <b>'+Math.round(surplusVsProg)+' kcal de trop</b> par rapport au programme. Pour rattraper : <b>'+cardioh+' h de cardio</b> supplémentaire (≈ 500 kcal/h).';
     short1='⚠️ Rattraper : <b>'+cardioh+' h de cardio</b>';
   }
-  /* Phrase 2 : date d'objectif via fin de programme ou déficit optimal */
+  /* Phrase 2 : date projetée = quand le deficit cumulé du programme couvre l'objectif */
   let p2,short2;
+  const remaining=Math.max(0,(g.kcal||0)-cum);
+  const projDate=S.programme?projDateFromProgramme(remaining):null;
   const progEnd=programmeEndDate();
-  if(S.programme&&progEnd){
+  if(S.programme&&projDate){
+    const fin=frShort(projDate);
+    p2='\U0001f3af En suivant ton programme, tu accumuleras le deficit necessaire pour atteindre <b>'+bft+' % de masse grasse</b> le <b>'+fin+'</b>.';
+    short2='\U0001f4aa En tryhardant au max, je serai bogoss le <b>'+fin+'</b>';
+  }else if(S.programme&&progEnd){
     const fin=frShort(progEnd);
-    p2='🎯 Si tu suis ton programme jusqu\'au bout, tu atteins ton objectif de <b>'+bft+' % de masse grasse</b> le <b>'+fin+'</b>.';
-    short2='💪 En tryhardant au max, je serai bogoss le <b>'+fin+'</b>';
+    p2='\U0001f3af Ton programme se termine le <b>'+fin+'</b>, mais il ne couvre pas encore tout le deficit necessaire. Continue au-dela !';
+    short2='\U0001f4aa Programme jusqu\'au <b>'+fin+'</b> — puis continuer';
   }else{
-    const rec=recDeficit();
-    if(rec){
-      const finD2=r=>{if(r<=0)return '—';const dl=(g.kcal-cum)/r;if(dl<=0)return 'déjà atteint 🎉';return frShort(new Date(today.getTime()+dl*86400000));};
-      p2='🎯 En tenant un déficit de <b>'+rec.def+' kcal/jour</b> (manger ~'+rec.intake+' kcal/j), tu atteins <b>'+bft+' % de masse grasse</b> le <b>'+finD2(rec.def)+'</b>.';
-      short2='💪 En tryhardant au max, je serai bogoss le <b>'+finD2(rec.def)+'</b>';
-    }else{p2='🎯 Complète ton profil pour estimer ta date d\'atteinte.';short2='🎯 Complète ton profil pour estimer';}
-  }
   const goalLabel=g.byWeight?('🎯 Objectif : '+g.targetW.toFixed(1)+' kg'):('🎯 Objectif : '+g.targetW.toFixed(1)+' kg · '+bft+' % MG');
   box.innerHTML='<div class="goal-title">'+goalLabel+'</div>'+
     '<div class="goal-pct">'+prog.toFixed(1)+'%</div>'+
