@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V2.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V2.0b · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -848,6 +848,13 @@ function renderGoal(cum,range){
     p2='\U0001f3af Ton programme se termine le <b>'+fin+'</b>, mais il ne couvre pas encore tout le deficit necessaire. Continue au-dela !';
     short2='\U0001f4aa Programme jusqu\'au <b>'+fin+'</b> — puis continuer';
   }else{
+    const rec=recDeficit();
+    if(rec){
+      const finD2=r=>{if(r<=0)return '—';const dl=(g.kcal-cum)/r;if(dl<=0)return 'déjà atteint 🎉';return frShort(new Date(today.getTime()+dl*86400000));};
+      p2='🎯 En tenant un déficit de <b>'+rec.def+' kcal/jour</b> (manger ~'+rec.intake+' kcal/j), tu atteins <b>'+bft+' % de masse grasse</b> le <b>'+finD2(rec.def)+'</b>.';
+      short2='💪 En tryhardant au max, je serai bogoss le <b>'+finD2(rec.def)+'</b>';
+    }else{p2='🎯 Complète ton profil pour estimer ta date d\'atteinte.';short2='🎯 Complète ton profil pour estimer';}
+  }
   const goalLabel=g.byWeight?('🎯 Objectif : '+g.targetW.toFixed(1)+' kg'):('🎯 Objectif : '+g.targetW.toFixed(1)+' kg · '+bft+' % MG');
   box.innerHTML='<div class="goal-title">'+goalLabel+'</div>'+
     '<div class="goal-pct">'+prog.toFixed(1)+'%</div>'+
