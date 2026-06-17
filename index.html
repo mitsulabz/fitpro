@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V4.1 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.2 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -785,7 +785,7 @@ function renderDays(){
     const kcal=Math.round(dayKcal(day));const P=dayMacro(day,'p'),G=dayMacro(day,'g'),L=dayMacro(day,'l'),FI=dayMacro(day,'fi'),SEL=dayMacro(day,'sel');
     const logged=day.foods.length>0;
     const exp=dayExpend(day,ds);
-    const progDayC=getProgramDay(ds);const expForCum=progDayC?progDayC.calories_brulees:exp;
+    const progDayC=getProgramDay(ds);const extraKcal=num(day.extraKcal)||0;const expForCum=(progDayC?progDayC.calories_brulees:exp)+extraKcal;
     const defDisplay=logged?(expForCum-kcal):0;
     const def=defDisplay;
     if(logged&&parseDS(ds)<todayD&&progDayC)cum+=(expForCum-kcal);
@@ -804,6 +804,7 @@ function renderDays(){
     Object.entries(acts).filter(([name])=>!isLibre(name)&&!isRepos(name)).forEach(([name,kcal])=>{const sel=(curAct&&curAct.name===name)?' selected':'';progOpts+='<option value="'+esc(name)+'"'+sel+'>'+esc(name)+' ('+Math.round(kcal)+' kcal)</option>';});
     const sportSel='<div class="field">📅 Programme <select class="progactsel" data-ds="'+ds+'">'+progOpts+'</select></div>';
     const weightRow='<div class="field">⚖️ Poids <input class="inp xs wt" data-ds="'+ds+'" value="'+esc(day.weight||'')+'" placeholder="—"> kg &nbsp; 💪 MG <input class="inp xs wbf" data-ds="'+ds+'" value="'+esc(day.bf||'')+'" placeholder="—"> %</div>';
+    const extraRow='<div class="field">🚴 Sport suppl. <input class="inp xs wextra" data-ds="'+ds+'" value="'+esc(day.extraKcal||'')+'" placeholder="0"> kcal brûlées</div>';
 
     /* cible du jour : programme si disponible, sinon -20% de la dépense */
     const progDay=getProgramDay(ds);
@@ -826,7 +827,7 @@ function renderDays(){
       '<summary><span class="sum-date">'+frDate(ds)+(isToday?' • aujourd\'hui':'')+(progType?' <span class="muted" style="font-size:.75rem"> · '+esc(progType)+'</span>':'')+'</span>'+
       '<span class="sum-meta">'+(sportTxt?esc(sportTxt)+'<br>':'')+sumDef+'</span></summary>'+
       sportSel+
-      weightRow+targetRow+
+      weightRow+extraRow+targetRow+
       macro+energy+foods+'</details>');
   });
   box.innerHTML=cards.reverse().join('');
@@ -912,6 +913,7 @@ function bindDayEvents(){
   $$('.progactsel').forEach(sel=>sel.onchange=()=>{const d=getDay(sel.dataset.ds);const v=sel.value;const acts=getProgramActivites();d.progActivity=(v==='')?false:{name:v,kcal:acts[v]||0};save();renderDays();});
   $$('.wt').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).weight=i.value.trim();save();renderDays();});
   $$('.wbf').forEach(i=>i.onchange=()=>{getDay(i.dataset.ds).bf=i.value.trim();save();});
+  $$('.wextra').forEach(i=>i.onchange=()=>{const v=parseFloat(i.value)||0;getDay(i.dataset.ds).extraKcal=v||null;save();renderDays();});
   $$('.rmf').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const d=getDay(b.dataset.ds);d.foods.splice(+b.dataset.fi,1);save();renderDays();});
   $$('.addfoodbtn').forEach(b=>b.onclick=()=>openFoodModal(b.dataset.ds));
 }
@@ -995,7 +997,8 @@ $('#saveProgActivites').onclick=()=>{
 /* ============================== FAVORIS (onglet Aliments) ============================== */
 function renderFav(){const box=$('#favList');
   if(!S.favorites.length){box.innerHTML='<div class="empty">Aucun favori.<br>Ajoute des aliments via la recherche Open Food Facts, le scan, ou en manuel.</div>';return;}
-  box.innerHTML=S.favorites.map((f,i)=>favRow(f,i)).join('');
+  const favSorted=[...S.favorites].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  box.innerHTML=favSorted.map((f)=>favRow(f,S.favorites.indexOf(f))).join('');
   $$('.fav_del').forEach(b=>b.onclick=()=>{S.favorites.splice(+b.dataset.i,1);save();renderFav();});}
 function favRow(f,i){const per=f.per==='unit'?'/ portion':'/ 100 g';
   const img=f.img?'<img src="'+esc(f.img)+'" alt="">':'';
@@ -1066,7 +1069,8 @@ async function onBarcode(code){const now=Date.now();if(code===lastCode&&now-last
 
 /* --- Favoris (picker dans le modal) --- */
 function renderFavPicker(){const box=$('#favPicker');if(!S.favorites.length){box.innerHTML='<div class="empty">Aucun favori. Ajoute-en via recherche/scan/manuel — ils apparaîtront ici.</div>';return;}
-  box.innerHTML=S.favorites.map((f,i)=>'<div class="res" data-i="'+i+'">'+(f.img?'<img src="'+esc(f.img)+'">':'')+'<div class="info"><div class="nm">'+esc(f.name)+'</div><div class="mac">'+Math.round(f.kcal)+' kcal '+(f.per==='unit'?'/portion':'/100g')+'</div></div></div>').join('');
+  const fpSorted=[...S.favorites].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  box.innerHTML=fpSorted.map((f)=>{const i=S.favorites.indexOf(f);return '<div class="res" data-i="'+i+'">'+(f.img?'<img src="'+esc(f.img)+'">':'')+'<div class="info"><div class="nm">'+esc(f.name)+'</div><div class="mac">'+Math.round(f.kcal)+' kcal '+(f.per==='unit'?'/portion':'/100g')+'</div></div></div>';}).join('');
   box.querySelectorAll('.res[data-i]').forEach(el=>el.onclick=()=>{const f=Object.assign({},S.favorites[+el.dataset.i]);openQty(f,true);});}
 
 /* --- Manuel --- */
