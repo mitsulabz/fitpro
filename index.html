@@ -465,7 +465,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V4.3 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.4 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -809,16 +809,22 @@ function renderDays(){
 
     /* cible du jour : programme si disponible, sinon -20% de la dépense */
     const progDay=getProgramDay(ds);
-    const tIntake=progDay?progDay.calories:Math.round(exp-deficitFor(exp));
-    const tExpend=progDay?progDay.calories_brulees:Math.round(exp);
     const progType=progDay?progDay.type:'';
+    const isLibreDay=isLibre(progType);
+    /* Libre = équilibre : manger à la dépense estimée, déficit = 0 */
+    const tExpend=progDay&&progDay.calories_brulees?progDay.calories_brulees:Math.round(exp);
+    const tIntake=isLibreDay?Math.round(exp):(progDay&&progDay.calories?progDay.calories:Math.round(exp-deficitFor(exp)));
     let targetRow;
-    if(logged){const rem=tIntake-kcal;targetRow='<div class="field">🎯 Cible <b>'+tIntake+'</b> kcal'+(progDay?' <span class="muted">('+esc(progType)+')</span>':' (−20 %)')+' · '+(rem>=0?('reste <b style="color:var(--ok)">'+rem+'</b> à manger'):('<b style="color:var(--bad)">dépassé de '+(-rem)+'</b>'))+'</div>';}
-    else targetRow='<div class="field">🎯 Cible du jour : <b>'+tIntake+'</b> kcal'+(progDay?' <span class="muted" style="font-size:.82rem">'+esc(progType)+'</span>':' <span class="muted">(−20 %)</span>')+'</div>';
-    const realDef=logged?(tExpend-kcal):0;
+    if(isLibreDay){
+      const rem=tIntake-kcal;
+      if(logged){targetRow='<div class="field">⚖️ Journée libre — équilibre <b>'+tIntake+'</b> kcal · '+(rem>=0?('reste <b style="color:var(--ok)">'+rem+'</b> à manger'):('<b style="color:var(--bad)">dépassé de '+(-rem)+'</b>'))+'</div>';}
+      else{targetRow='<div class="field">⚖️ Journée libre — équilibre estimé : <b>'+tIntake+'</b> kcal</div>';}
+    }else if(logged){const rem=tIntake-kcal;targetRow='<div class="field">🎯 Cible <b>'+tIntake+'</b> kcal'+(progDay?' <span class="muted">('+esc(progType)+')</span>':' (−20 %)')+' · '+(rem>=0?('reste <b style="color:var(--ok)">'+rem+'</b> à manger'):('<b style="color:var(--bad)">dépassé de '+(-rem)+'</b>'))+'</div>';}
+    else{targetRow='<div class="field">🎯 Cible du jour : <b>'+tIntake+'</b> kcal'+(progDay?' <span class="muted" style="font-size:.82rem">'+esc(progType)+'</span>':' <span class="muted">(−20 %)</span>')+'</div>';}
+    const realDef=logged?(isLibreDay?0:tExpend-kcal):0;
     let energy;
-    if(logged){const dc=realDef>=0?'pos':'neg';energy='<div class="energy"><span>Ingéré <b>'+kcal+'</b></span><span>Dépense'+(progDay?' prévu':' est.')+' <b>'+Math.round(tExpend)+'</b></span><span>Déficit <b class="'+dc+'">'+(realDef>=0?'+':'')+Math.round(realDef)+'</b></span><span class="cum">cumul '+(cum>=0?'+':'')+Math.round(cum)+'</span></div>';}
-    else energy='<div class="energy"><span class="muted">Repas à compléter</span><span class="cum">Dépense '+(progDay?'prévue':' est.')+' '+Math.round(tExpend)+'</span></div>';
+    if(logged){const dc=realDef>=0?'pos':'neg';energy='<div class="energy"><span>Ingéré <b>'+kcal+'</b></span>'+(isLibreDay?'<span class="muted">Journée libre</span>':'<span>Dépense'+(progDay?' prévu':' est.')+' <b>'+Math.round(tExpend)+'</b></span><span>Déficit <b class="'+dc+'">'+(realDef>=0?'+':'')+Math.round(realDef)+'</b></span>')+'<span class="cum">cumul '+(cum>=0?'+':'')+Math.round(cum)+'</span></div>';}
+    else energy='<div class="energy"><span class="muted">Repas à compléter</span><span class="cum">'+(isLibreDay?'Journée libre':'Dépense '+(progDay?'prévue':' est.')+' '+Math.round(tExpend))+'</span></div>';
     let li='';day.foods.forEach((f,fi)=>{li+='<li><span>'+esc(f.n)+'</span><span class="r">'+Math.round(f.k)+' kcal <button class="rmf" data-ds="'+ds+'" data-fi="'+fi+'">✕</button></span></li>';});
     const foods='<details class="foods"'+(day.foods.length?' open':'')+'><summary>Aliments ('+day.foods.length+')</summary><ul>'+li+'</ul><button class="addfoodbtn" data-ds="'+ds+'">＋ Ajouter un aliment</button></details>';
     const tm=progDay?{tp:progDay.proteines_g,tg:progDay.glucides_g,tl:progDay.lipides_g,tfi:Math.round(tIntake/1000*14),tsel:5}:(logged?targetMacros(tIntake,num(S.profile.weight)):null);
