@@ -298,6 +298,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
       <div id="progStatus" style="font-size:.85rem;margin:8px 0"></div>
       <div class="row" style="gap:8px">
         <button class="btn ghost" id="importProg">⬆️ Importer un programme</button>
+        <button class="btn ghost" id="exportProg">⬇️ Exporter le programme</button>
         <button class="btn ghost" id="clearProg" style="display:none">🗑️ Supprimer</button>
       </div>
       <input type="file" id="progFile" accept="application/json" style="display:none">
@@ -464,7 +465,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V4.2 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.3 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -981,6 +982,7 @@ function renderProgStatus(){
 $('#importProg').onclick=()=>$('#progFile').click();
 $('#progFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.jours||!Array.isArray(o.jours))throw new Error();S.programme=o;save();renderProgStatus();renderDays();toast('Programme importé ✓');}catch(err){alert('Fichier de programme invalide.');}};r.readAsText(f);};
 $('#clearProg').onclick=()=>{if(confirm('Supprimer le programme ?')){S.programme=null;save();renderProgStatus();renderDays();toast('Programme supprimé');}};
+$('#exportProg').onclick=()=>{if(!S.programme){toast('Aucun programme à exporter.');return;}const blob=new Blob([JSON.stringify(S.programme,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='programme-fitpro-'+dstr(new Date()).replace(/\//g,'-')+'.json';a.click();};
 
 /* ============================== HANDLERS PAGE PROGRAMME ============================== */
 $('#saveProgAct').onclick=()=>{
