@@ -464,7 +464,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V4.0 · 16/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.1 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -791,7 +791,8 @@ function renderDays(){
     if(logged&&parseDS(ds)<todayD&&progDayC)cum+=(expForCum-kcal);
     const isToday=ds===today;
     let sumDef;
-    if(logged){const sm=defDisplay>=900?'🤩':defDisplay>=600?'😀':defDisplay>=300?'🙂':defDisplay>=0?'😐':'😞';
+    if(isToday){sumDef=logged?'<span class="muted">en cours…</span>':'<span class="muted">à compléter</span>';}
+    else if(logged){const sm=defDisplay>=900?'🤩':defDisplay>=600?'😀':defDisplay>=300?'🙂':defDisplay>=0?'😐':'😞';
       sumDef=sm+' <span class="sum-def '+(defDisplay>=0?'pos':'neg')+'">'+(defDisplay>=0?'+':'')+Math.round(defDisplay)+' kcal</span>';}
     else sumDef='<span class="muted">à compléter</span>';
     const actName=(getDayActivity(ds)||{}).name||'';const sportTxt=actName;
