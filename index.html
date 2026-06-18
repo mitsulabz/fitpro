@@ -465,7 +465,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V4.4 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.5 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -575,15 +575,8 @@ function goalCalc(){const p=S.profile;const w=num(p.weight);if(!w)return null;
     const endDate=programmeEndDate();if(!endDate||!S.programme)return null;
     const today2=new Date();today2.setHours(0,0,0,0);if(endDate<=today2)return null;
     const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-    let totalDef=0;
-    (S.programme.jours||[]).forEach(j=>{
-      const parts=(j.jour||'').toLowerCase().split(' ').filter(Boolean);
-      const d2=parseInt(parts[parts.length-2]);const mo=mois.indexOf(parts[parts.length-1]);
-      if(isNaN(d2)||mo<0)return;
-      const yr=new Date().getFullYear()+(mo<new Date().getMonth()?1:0);
-      const jd=new Date(yr,mo,d2);jd.setHours(0,0,0,0);
-      if(jd>=today2)totalDef+=(j.deficit||0);
-    });
+    /* totalDef = déficit total du programme dès le 1er jour (fixe) */
+    let totalDef=(S.programme.jours||[]).reduce((s,j)=>s+(j.deficit||0),0);
     if(totalDef<=0)return null;
     const fatToLose=totalDef/7700;
     const bf=num(p.bf),bft=num(p.bft);
