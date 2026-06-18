@@ -465,7 +465,7 @@ details.day.today:not([open]){background:var(--accent-soft);border-color:var(--a
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================== ÉTAT ============================== */
-const BUILD='FitPro V4.5 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
+const BUILD='FitPro V4.6 · 17/06/2026'; /* IMPORTANT : change ce repère à CHAQUE déploiement -> déclenche la mise à jour auto */
 const LS_KEY='fitnoob_v1';
 /* === CONFIG SUPABASE (synchro multi-appareils) ===
    Colle l'URL de ton projet et la clé "anon" (publique, sans danger à exposer).
@@ -806,7 +806,7 @@ function renderDays(){
     const isLibreDay=isLibre(progType);
     /* Libre = équilibre : manger à la dépense estimée, déficit = 0 */
     const tExpend=progDay&&progDay.calories_brulees?progDay.calories_brulees:Math.round(exp);
-    const tIntake=isLibreDay?Math.round(exp):(progDay&&progDay.calories?progDay.calories:Math.round(exp-deficitFor(exp)));
+    const tIntake=progDay&&progDay.calories?progDay.calories:Math.round(isLibreDay?exp:exp-deficitFor(exp));
     let targetRow;
     if(isLibreDay){
       const rem=tIntake-kcal;
